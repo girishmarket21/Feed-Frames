@@ -1,0 +1,3028 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Feed Frames</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@400;600&family=Great+Vibes&family=Montserrat:wght@400;600&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: a light table. Quiet control panel on the left, finished posts laid out on a dark neutral stage on the right. */
+:root{
+  color-scheme:light;
+  --paper:#ECEEF1;
+  --panel:#FFFFFF;
+  --ink:#13161A;
+  --ink-2:#4C545E;
+  --line:#D3D8DE;
+  --stage:#22262B;
+  --stage-2:#2C3137;
+  --stage-ink:#E9ECEF;
+  --stage-mute:#A0A9B3;
+  --stage-line:#434A52;
+  --accent:#D63A2A;
+  --accent-ink:#FFFFFF;
+  --focus:#2A6BFF;
+  --warn-bg:#FFC857;
+  --warn-ink:#241800;
+  --ig-bg:#FFFFFF;
+  --ig-ink:#111111;
+  --ig-mute:#737373;
+  --ig-line:#DBDBDB;
+  --ig-blue:#0095F6;
+  --display:'Bricolage Grotesque','Avenir Next','Segoe UI',system-ui,sans-serif;
+  --body:'Hanken Grotesk','Segoe UI',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1114;--panel:#181B1F;--ink:#ECEFF2;--ink-2:#A0A9B4;--line:#2D3238;
+    --stage:#0A0B0D;--stage-2:#16191D;--stage-ink:#E9ECEF;--stage-mute:#8E98A3;--stage-line:#2F353C;
+    --accent:#FF5B49;--accent-ink:#1A0905;--focus:#7AA2FF;
+    --ig-bg:#000000;--ig-ink:#F5F5F5;--ig-mute:#A8A8A8;--ig-line:#262626;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1114;--panel:#181B1F;--ink:#ECEFF2;--ink-2:#A0A9B4;--line:#2D3238;
+  --stage:#0A0B0D;--stage-2:#16191D;--stage-ink:#E9ECEF;--stage-mute:#8E98A3;--stage-line:#2F353C;
+  --accent:#FF5B49;--accent-ink:#1A0905;--focus:#7AA2FF;
+  --ig-bg:#000000;--ig-ink:#F5F5F5;--ig-mute:#A8A8A8;--ig-line:#262626;color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:400 14px/1.45 var(--body);padding-inline:clamp(16px,3vw,32px);padding-block:20px 40px}
+h1,h2,h3,p,figure,ul{margin:0}
+ul{padding:0;list-style:none}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 20px;margin-bottom:18px}
+h1{font:700 clamp(28px,4.4vw,38px)/1 var(--display);letter-spacing:-.025em}
+.lede{color:var(--ink-2);max-width:62ch}
+.grid{display:grid;grid-template-columns:minmax(300px,360px) minmax(0,1fr);gap:20px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;min-width:0}
+.sec{padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.sec+.sec{border-top:1px solid var(--line)}
+.sec h2{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+.hint2{color:var(--ink-2);font-size:13px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.row output{font:500 12px var(--mono);color:var(--ink-2)}
+.drop{position:relative;display:flex;flex-direction:column;gap:2px;padding:16px;border:1.5px dashed var(--line);border-radius:8px;cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.drop strong{font:600 16px var(--display)}
+.drop span{color:var(--ink-2);font-size:13px}
+.drop:focus-within{outline:2px solid var(--focus);outline-offset:2px}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px}
+.thumb{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--line)}
+.thumb canvas{width:100%;height:100%;display:block}
+.thumb button{position:absolute;top:2px;right:2px;width:20px;height:20px;padding:0;border:0;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;font-size:14px;line-height:1;display:grid;place-items:center}
+.note{font-size:12.5px;color:var(--ink-2);background:color-mix(in srgb,var(--warn-bg) 28%,transparent);border-radius:6px;padding:7px 10px}
+.link{background:none;border:0;padding:0;color:var(--ink-2);text-decoration:underline;font-size:13px}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.opt{display:flex;gap:10px;align-items:center;text-align:left;padding:10px;border:1px solid var(--line);border-radius:8px;background:transparent;min-width:0}
+.opt:hover{border-color:var(--ink-2)}
+.opt[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt .ico{flex:none;display:grid;place-items:center;width:34px;height:34px;color:var(--ink)}
+.opt .ico i{display:block;border:2px solid currentColor;border-radius:2px}
+.opt b{display:block;font-weight:600}
+.opt small{display:block;color:var(--ink-2);font:400 11px/1.35 var(--mono)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:transparent;font-size:13px}
+.chip:hover{border-color:var(--accent)}
+.sw{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw button{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);padding:0}
+.sw button[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:2px}
+.sw input[type=color]{width:38px;height:28px;padding:0;border:1px solid var(--line);border-radius:6px;background:none}
+input[type=range]{width:100%;accent-color:var(--accent)}
+select,input[type=text],textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink)}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13px}
+.check input{margin-top:2px;accent-color:var(--accent)}
+.stack{display:flex;flex-direction:column;gap:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:7px;border:1px solid var(--line);background:var(--panel);font-weight:600}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.vh:focus-visible+label{outline:2px solid var(--focus);outline-offset:2px}
+
+.stage{background:var(--stage);color:var(--stage-ink);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.bar h2{font:700 20px/1.1 var(--display);letter-spacing:-.01em}
+.bar .btns{display:flex;flex-wrap:wrap;gap:8px}
+.stage .btn:not(.primary){background:transparent;border-color:var(--stage-line);color:var(--stage-ink)}
+.stage .btn:not(.primary):hover{border-color:var(--stage-mute)}
+.stage .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.hint{color:var(--stage-mute);font-size:13px}
+.posts{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:14px;align-items:start}
+.post{background:var(--stage-2);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.shot{position:relative;line-height:0;border-radius:3px;overflow:hidden}
+.shot canvas{width:100%;height:auto;display:block;max-width:100%}
+.shot.pick canvas{cursor:crosshair}
+.pin{position:absolute;width:18px;height:18px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.55);transform:translate(-50%,-50%);opacity:0;pointer-events:none;transition:opacity .15s}
+.shot:hover .pin,.pin.on{opacity:1}
+.meta{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 8px;font:400 11px var(--mono);color:var(--stage-mute)}
+.tag{padding:1px 6px;border-radius:4px;background:var(--warn-bg);color:var(--warn-ink);font:500 10px var(--mono);letter-spacing:.05em;text-transform:uppercase}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.edit{display:flex;flex-direction:column;gap:8px}
+.esec{border:1px solid var(--stage-line);border-radius:8px;background:var(--stage-2)}
+.esec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;font-size:13px}
+.esec>summary::-webkit-details-marker{display:none}
+.esec>summary .st{font-weight:600}
+.esec>summary .sh{margin-left:auto;font-size:12px;opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.esec>summary::after{content:'';flex:none;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);opacity:.7;transition:transform .15s}
+.esec[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
+.esec>summary:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.esec[open]>summary{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom:1px solid var(--stage-line)}
+.sbody{display:flex;flex-direction:column;gap:8px;padding:10px}
+.sbody:empty{display:none}
+.tbox{display:flex;flex-direction:column;gap:8px}
+.tlayer{display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid var(--stage-line);border-radius:6px}
+.tlayer .erow .btn.primary{flex:1 1 100%}
+.tlayer input[type=text]{box-sizing:border-box}
+.tlayer textarea{width:100%;box-sizing:border-box;font:inherit;resize:vertical;min-height:44px}
+.tgrid{display:grid;grid-template-columns:repeat(3,22px);gap:3px}
+.tgrid .btn{padding:0;width:22px;height:22px;min-width:0}
+.tgrid .btn[aria-pressed="true"]{background:var(--accent)}
+.topts{display:flex;flex-direction:column;gap:4px}
+.topts .btn{text-align:left;white-space:normal}
+.edit .val{font:500 12px var(--mono);color:var(--ink-2);min-width:64px;text-align:right}
+.stage .acts .btn.rd{flex:1 1 100%}
+.stage .acts .btn{flex:1;padding:7px 6px;font-size:13px}
+.stage .acts .btn[aria-pressed="true"]{border-color:var(--accent)}
+.edit .erow .btn[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.empty{color:var(--stage-mute);padding:24px 4px}
+
+.slider{position:relative}
+.track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:3px}
+.track::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;min-width:0;scroll-snap-align:center;line-height:0}
+.slide canvas{width:100%;height:auto;display:block}
+.pill{position:absolute;top:8px;right:8px;padding:2px 8px;border-radius:999px;background:rgba(0,0,0,.65);color:#fff;font:500 11px var(--mono);line-height:1.5;pointer-events:none}
+.dotrow{display:flex;justify-content:center;gap:5px;padding-top:8px}
+.dotrow i{width:6px;height:6px;border-radius:50%;background:#7C858F;opacity:.6}
+.dotrow i.on{background:var(--ig-blue);opacity:1}
+.nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:0;background:rgba(255,255,255,.85);color:#111;display:grid;place-items:center;padding:0;opacity:0;transition:opacity .15s;font-size:16px;line-height:1}
+.nav.l{left:6px}.nav.r{right:6px}
+.slider:hover .nav{opacity:1}
+.nav[hidden]{display:none}
+
+.tray{background:var(--stage-2);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.tray h3{font:600 13px var(--display)}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px}
+.tchip{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 5px;border:1px solid var(--stage-line);border-radius:8px;min-width:0}
+.tchip canvas{width:36px;height:36px;border-radius:4px;display:block}
+.tchip select{width:auto;max-width:150px;padding:5px 6px;font-size:12px;background:var(--stage-2);border-color:var(--stage-line);color:var(--stage-ink)}
+.edit{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--stage-line);padding-top:10px}
+.edit label{font-size:12px;color:var(--stage-mute)}
+.edit select{padding:5px 6px;font-size:12px;background:var(--stage-2);border-color:var(--stage-line);color:var(--stage-ink)}
+.plist{display:flex;flex-direction:column;gap:8px}
+.plist li{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px;border:1px solid var(--stage-line);border-radius:6px}
+.plist canvas{width:36px;height:36px;border-radius:4px;display:block;flex:none}
+.plist .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.plist .ctl{display:flex;flex-wrap:wrap;gap:4px;width:100%}
+.plist .ctl select{flex:1;min-width:0;width:auto}
+.sq{width:28px;height:28px;padding:0;border:1px solid var(--stage-line);border-radius:6px;background:transparent;color:var(--stage-ink);display:grid;place-items:center;font-size:14px;line-height:1}
+.sq:disabled{opacity:.35;cursor:not-allowed}
+.erow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.erow .grow{flex:1;min-width:0}
+.stage .erow .btn{padding:5px 8px;font-size:12px}
+
+.cap{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--stage-line);padding-top:16px}
+.cap h3{font:700 16px var(--display)}
+.cap label{font-size:13px;color:var(--stage-mute)}
+.cap input,.cap textarea{background:var(--stage-2);border-color:var(--stage-line);color:var(--stage-ink)}
+.cap textarea{resize:vertical;min-height:140px;line-height:1.5}
+.cap .btns{display:flex;flex-wrap:wrap;gap:8px}
+
+.viewer{position:fixed;inset:0;background:rgba(5,6,8,.88);display:grid;place-items:center;padding:16px;z-index:20;overflow:auto}
+.viewer figure{display:flex;flex-direction:column;gap:10px;max-width:min(100%,880px);max-height:100%;color:#E9ECEF}
+.viewer img{max-width:100%;max-height:calc(100vh - 130px);object-fit:contain;border-radius:4px;background:#fff}
+.viewer figcaption{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;font:400 12px var(--mono)}
+.viewer .btn{background:transparent;border-color:#555C65;color:#E9ECEF}
+.viewer .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.igwrap{display:flex;flex-direction:column;gap:12px;align-items:center;width:min(100%,400px);max-height:100%}
+.phone{width:100%;background:var(--ig-bg);color:var(--ig-ink);border-radius:14px;overflow:auto;max-height:calc(100vh - 100px);border:1px solid var(--ig-line)}
+.ig-head{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.ig-head b{font-weight:600;font-size:13px;flex:1}
+.ig-head .av{width:32px;height:32px;border-radius:50%;background:conic-gradient(from 200deg,#F9A03F,#E1306C,#8A3AB9,#F9A03F);box-shadow:inset 0 0 0 2px var(--ig-bg)}
+.ig-head .more{color:var(--ig-mute);letter-spacing:2px}
+.phone .track{border-radius:0}
+.phone .dotrow{padding-top:10px}
+.phone .nav{background:rgba(255,255,255,.9)}
+.ig-acts{display:flex;gap:14px;padding:10px 12px 4px}
+.ig-acts svg{width:24px;height:24px;stroke:var(--ig-ink);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ig-acts .sp{flex:1}
+.ig-cap{padding:4px 12px 14px;font-size:13px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.ig-cap.mute{color:var(--ig-mute)}
+.igbar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center;color:#E9ECEF;font:400 12px var(--mono)}
+.igbar .btn{padding:6px 10px;font-size:13px}
+
+.refrow{display:flex;gap:8px;align-items:stretch}
+.refrow input{flex:1;min-width:0}
+.refs{display:flex;flex-direction:column;gap:8px}
+.refs li{border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.refs .u{font:500 12px var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.refs .st{font:500 11px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2)}
+.refs .st.ready{color:var(--accent)}
+.refs .rn{font-size:13px;color:var(--ink-2)}
+.refs .ra{display:flex;gap:6px;flex-wrap:wrap}
+.refs .ra .btn{padding:5px 10px;font-size:13px}
+@media (min-width:861px){
+  .controls{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow:auto}
+}
+@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<main>
+  <header class="top">
+    <h1>Feed Frames</h1>
+    <p class="lede">Add your edited photos, choose a post shape and a style, and save finished files to your computer. Your photos stay in this page and nothing is posted anywhere.</p>
+  </header>
+
+  <div class="grid">
+    <aside class="panel controls" aria-label="Controls">
+      <section class="sec" aria-labelledby="h-photos">
+        <h2 id="h-photos">Photos</h2>
+        <label class="drop" id="drop">
+          <input class="vh" id="files" type="file" accept="image/*" multiple>
+          <strong>Drop edited photos here</strong>
+          <span>or click to choose files</span>
+        </label>
+        <p class="note" id="sampleNote" hidden>Showing five sample frames so you can see how it works. Add your own photos to replace them.</p>
+        <div class="thumbs" id="thumbs"></div>
+        <div class="row"><span class="hint2" id="photoCount"></span><button class="link" id="clearAll" type="button">Remove all</button></div>
+      </section>
+
+      <section class="sec" aria-labelledby="h-shape">
+        <h2 id="h-shape">Shape</h2>
+        <div class="opts" id="ratios"></div>
+      </section>
+
+      <section class="sec" aria-labelledby="h-style">
+        <h2 id="h-style">Style</h2>
+        <div class="chips" id="presets" aria-label="Quick styles"></div>
+        <label class="check"><input id="combine" type="checkbox"><span>Combine several styles: tick the layouts you want and the app mixes only those</span></label>
+        <div class="opts" id="layouts"></div>
+        <div class="stack" id="singleBox">
+          <label for="single">Single photos and slides</label>
+          <select id="single">
+            <option value="frame">Whole photo in a frame</option>
+            <option value="plain">Crop to fill</option>
+          </select>
+        </div>
+        <div id="bgBox" class="stack" style="gap:8px">
+          <span>Background</span>
+          <div class="sw" id="swatches"></div>
+        </div>
+        <div id="frameBox" class="stack">
+          <div class="row"><label for="frame">Border width</label><output id="frameOut" for="frame"></output></div>
+          <input id="frame" type="range" min="0" max="20" step="1">
+        </div>
+        <div id="gapBox" class="stack">
+          <div class="row"><label for="gap">Space between photos</label><output id="gapOut" for="gap"></output></div>
+          <input id="gap" type="range" min="0" max="10" step="1">
+        </div>
+        <label class="check" id="fillBox"><input id="fill" type="checkbox"><span>Crop collage photos to fill their cells (otherwise each photo is shown whole)</span></label>
+        <div class="stack">
+          <label for="size">Export size</label>
+          <select id="size">
+            <option value="3">Best quality, 2000 pixels wide (2000 × 2500 for feed portrait)</option>
+            <option value="2">Largest, 2160 pixels wide</option>
+            <option value="1">Instagram standard, 1080 pixels wide</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="sec" id="refSec" hidden aria-labelledby="h-ref">
+        <h2 id="h-ref">Match a post you like</h2>
+        <div class="stack" id="linkBox" hidden>
+          <label for="refLink">Instagram post link</label>
+          <div class="refrow">
+            <input id="refLink" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://www.instagram.com/p/...">
+            <button class="btn primary" id="saveLink" type="button">Save link</button>
+          </div>
+          <p class="hint2" id="linkNote" role="status" aria-live="polite">Paste a post link and save it. This page cannot open Instagram itself, so Claude reads the post for you: after saving, tell Claude in your chat &ldquo;process my Feed Frames links&rdquo;. When it is ready, press Use this layout.</p>
+          <ul class="refs" id="refList"></ul>
+        </div>
+        <div class="stack" id="shotBox" hidden>
+          <p class="hint2">Or choose a screenshot of an Instagram post. Claude reads its layout, border and background colour, then sets the style controls above to something similar. Only the screenshot is sent, never your photos.</p>
+          <input class="vh" id="refFile" type="file" accept="image/*">
+          <label class="btn" for="refFile">Choose screenshot</label>
+          <p class="hint2" id="refNote" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+    </aside>
+
+    <section class="stage" aria-labelledby="h-posts">
+      <div class="bar">
+        <div>
+          <h2 id="h-posts">Posts</h2>
+          <p class="hint" id="count"></p>
+        </div>
+        <div class="btns">
+          <button class="btn" id="randomize" type="button" hidden>Randomize</button>
+          <button class="btn" id="redesignAll" type="button">Redesign all</button>
+          <button class="btn" id="rearrange" type="button">Arrange automatically</button>
+          <button class="btn primary" id="saveAll" type="button">Save all</button>
+        </div>
+      </div>
+      <p class="hint" id="cropHint"></p>
+      <p class="hint" id="editHint"></p>
+      <p class="hint" id="status" role="status" aria-live="polite"></p>
+      <div class="tray" id="tray" hidden></div>
+      <div class="posts" id="posts"></div>
+
+      <div class="cap" id="capSec">
+        <h3>Caption and hashtags</h3>
+        <p class="hint">Written to help the post travel: a first line that stops the scroll, searchable words, a reason to save or share, and a short set of relevant hashtags. Instagram weighs saves, shares and early comments far more than hashtag count, so nobody can promise reach, but this gives each post its best start.</p>
+        <label for="kind">Type of shoot</label>
+        <select id="kind">
+          <option value="wedding">Wedding</option>
+          <option value="engagement">Engagement or couple</option>
+          <option value="portrait">Portrait</option>
+          <option value="family">Family</option>
+          <option value="maternity">Maternity or newborn</option>
+          <option value="event">Event or party</option>
+          <option value="other">Something else</option>
+        </select>
+        <label for="place">City or venue (helps local search)</label>
+        <input id="place" type="text" placeholder="Bentonville, Arkansas">
+        <label for="about">What is this post about? (optional)</label>
+        <input id="about" type="text" placeholder="Golden hour portraits, outdoor ceremony, first look">
+        <div class="btns">
+          <button class="btn primary" id="quick" type="button">Quick draft</button>
+          <button class="btn primary" id="draft" type="button" hidden>Draft with Claude</button>
+          <button class="btn" id="copyCap" type="button">Copy</button>
+        </div>
+        <p class="hint2" id="capNote" role="status" aria-live="polite"></p>
+        <textarea id="caption" rows="9" aria-label="Caption and hashtags" placeholder="Your caption appears here. You can edit it."></textarea>
+        <label for="alt">Alt text (paste into Instagram's Accessibility settings; it also helps search)</label>
+        <textarea id="alt" rows="2" aria-label="Alt text" placeholder="A short description of the photo."></textarea>
+        <div class="btns"><button class="btn" id="copyAlt" type="button">Copy alt text</button></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="viewer" id="ig" hidden role="dialog" aria-modal="true" aria-label="Instagram preview">
+  <div class="igwrap">
+    <div class="phone" id="phone"></div>
+    <div class="igbar">
+      <button class="btn" id="igPrev" type="button">Previous post</button>
+      <span id="igPos"></span>
+      <button class="btn" id="igNext" type="button">Next post</button>
+      <button class="btn" id="igFull" type="button">Full size</button>
+      <button class="btn primary" id="igClose" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="viewer" id="viewer" hidden role="dialog" aria-modal="true" aria-label="Full size preview">
+  <figure>
+    <img id="vimg" alt="Finished post at full size">
+    <figcaption>
+      <span id="vcap"></span>
+      <span style="display:flex;gap:6px">
+        <button class="btn primary" id="vsave" type="button">Save</button>
+        <button class="btn" id="vclose" type="button">Close</button>
+      </span>
+    </figcaption>
+  </figure>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(() => {
+'use strict';
+
+// ==PURE-START==
+const RATIOS = {
+  '4:5':  { w:4,  h:5,  label:'Feed portrait' },
+  '1:1':  { w:1,  h:1,  label:'Square' },
+  '9:16': { w:9,  h:16, label:'Story or Reel' },
+  '16:9': { w:16, h:9,  label:'Landscape' }
+};
+const MAX_PER_POST = 3;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+// Export widths in pixels. 3 is the default: 2000 wide gives 2000 x 2500 for a 4:5 post.
+const EXPORT_Q = 1;
+const EXPORT_W = { 1: 1080, 2: 2160, 3: 2000 };
+function frameDims(key, scale) {
+  const r = RATIOS[key];
+  const W = EXPORT_W[scale] || 2000;
+  return { W, H: Math.round(W * r.h / r.w) };
+}
+
+function orientOf(w, h) {
+  const r = w / h;
+  if (r > 1.05) return 'landscape';
+  if (r < 0.95) return 'portrait';
+  return 'square';
+}
+
+// How many slides one photo should be cut into so that each slide keeps roughly the post's shape. 1 means "not wide enough, keep it whole".
+function suggestParts(w, h, key) {
+  const d = frameDims(key, 1);
+  const slideAspect = d.W / d.H, photoAspect = w / h;
+  if (photoAspect / slideAspect < 1.3) return 1;
+  return clamp(Math.round(photoAspect / slideAspect), 2, 3);
+}
+
+// Share of the photo that is cut away when it is scaled to fill `parts` slides side by side.
+function cropFraction(w, h, key, parts) {
+  const d = frameDims(key, 1);
+  const panorama = (d.W * parts) / d.H, photo = w / h;
+  return panorama > photo ? 1 - photo / panorama : 1 - panorama / photo;
+}
+
+// Photo slides: all photos go into one swipeable post, up to MAX_SLIDES per post. Extra photos spill into the next post,
+// and a lone photo is never left on its own when there is a previous post to share with.
+const MAX_SLIDES = 5;
+function carouselSizes(n) {
+  const out = [];
+  for (let left = n; left > 0; left -= MAX_SLIDES) out.push(Math.min(MAX_SLIDES, left));
+  if (out.length > 1 && out[out.length - 1] === 1) { out[out.length - 2]--; out[out.length - 1] = 2; }
+  return out;
+}
+
+// Small seeded random generator (mulberry32), so a given seed always gives the same arrangement.
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function shuffled(arr, rand) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+// Collage slides: one swipeable post whose slides each hold a small arrangement of 1 to 4 photos (a large one, with
+// smaller ones beside it or layered on top). Up to BOARD_CAP photos per post; more photos continue in the next post.
+const MAX_BOARD = 20, BOARD_CAP = 12;
+function boardSlideCount(n) {
+  if (n < 4) return 1;
+  return Math.max(Math.ceil(n / 4), clamp(Math.round(n / 3.4), 2, 5));
+}
+function boardSlideLimits(n) { return { min: Math.max(1, Math.ceil(n / 4)), max: Math.max(1, Math.min(5, n)) }; }
+function distribute(n, s) {
+  const base = Math.floor(n / s), rem = n % s;
+  return Array.from({ length: s }, (_, k) => base + (k < rem ? 1 : 0));
+}
+function boardGroupSizes(n) {
+  const out = [];
+  for (let left = n; left > 0; left -= BOARD_CAP) out.push(Math.min(BOARD_CAP, left));
+  if (out.length > 1 && out[out.length - 1] === 1) { out[out.length - 2]--; out[out.length - 1] = 2; }
+  return out;
+}
+function boardSlides(ids, nSlides) {
+  const lim = boardSlideLimits(ids.length);
+  const s = clamp(nSlides || boardSlideCount(ids.length), lim.min, lim.max);
+  let i = 0;
+  return distribute(ids.length, s).map(z => { const part = ids.slice(i, i + z); i += z; return part; });
+}
+const BOARD_TPLS = {
+  1: ['full'],
+  2: ['inset-br', 'halves', 'inset-tl', 'inset-bl', 'inset-tr'],
+  3: ['lead-two', 'inset-two', 'lead-top', 'stagger'],
+  4: ['grid', 'lead-three', 'lead-side', 'inset-three']
+};
+function pickTemplate(n, seed) {
+  const o = BOARD_TPLS[n] || BOARD_TPLS[1], s = Math.abs(Math.floor(seed)) || 0;
+  return { tpl: o[s % o.length], flip: Math.floor(s / o.length) % 2 === 1 };
+}
+// o: { frame, gap } as percentages of the short side. The first cell is the large photo; later cells may sit on top of it.
+function boardCells(tpl, W, H, o, dims, flip) {
+  const short = Math.min(W, H);
+  const m = Math.round(o.frame / 100 * short), g = Math.round(o.gap / 100 * short);
+  const pad = Math.round(0.045 * short), bw = Math.max(4, Math.round(0.012 * short));
+  const I = { x: m, y: m, w: W - 2 * m, h: H - 2 * m };
+  const C = (x, y, w, h, border) => ({ x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h), fit: 'cover', ...(border ? { border } : {}) });
+  const inset = (d, frac) => {
+    const w = Math.round(I.w * frac), asp = clamp(d.w / d.h, 0.75, 1.4);
+    return { w, h: Math.min(Math.round(w / asp), Math.round(I.h * 0.4)) };
+  };
+  const corner = (d, frac, where) => {
+    const { w, h } = inset(d, frac);
+    const x = where.includes('r') ? I.x + I.w - w - pad : I.x + pad;
+    const y = where.includes('b') ? I.y + I.h - h - pad : I.y + pad;
+    return C(x, y, w, h, bw);
+  };
+  let cells;
+  switch (tpl) {
+    case 'halves':
+      if (I.h >= I.w) { const h = (I.h - g) / 2; cells = [C(I.x, I.y, I.w, h), C(I.x, I.y + h + g, I.w, h)]; }
+      else { const w = (I.w - g) / 2; cells = [C(I.x, I.y, w, I.h), C(I.x + w + g, I.y, w, I.h)]; }
+      break;
+    case 'inset-br': case 'inset-tl': case 'inset-bl': case 'inset-tr':
+      cells = [C(I.x, I.y, I.w, I.h), corner(dims[1], 0.46, tpl.slice(6))];
+      break;
+    case 'lead-two': {
+      const lw = (I.w - g) * 0.62, rw = I.w - lw - g, h = (I.h - g) / 2;
+      cells = [C(I.x, I.y, lw, I.h), C(I.x + lw + g, I.y, rw, h), C(I.x + lw + g, I.y + h + g, rw, h)];
+      break;
+    }
+    case 'lead-top': {
+      const th = (I.h - g) * 0.6, bh = I.h - th - g, w = (I.w - g) / 2;
+      cells = [C(I.x, I.y, I.w, th), C(I.x, I.y + th + g, w, bh), C(I.x + w + g, I.y + th + g, w, bh)];
+      break;
+    }
+    case 'inset-two': {
+      cells = [C(I.x, I.y, I.w, I.h), corner(dims[1], 0.4, 'bl'), corner(dims[2], 0.4, 'br')];
+      break;
+    }
+    case 'stagger':
+      cells = [C(I.x, I.y, I.w, I.h), corner(dims[1], 0.44, 'br'), corner(dims[2], 0.3, 'tl')];
+      break;
+    case 'grid': {
+      const w = (I.w - g) / 2, h = (I.h - g) / 2;
+      cells = [C(I.x, I.y, w, h), C(I.x + w + g, I.y, w, h), C(I.x, I.y + h + g, w, h), C(I.x + w + g, I.y + h + g, w, h)];
+      break;
+    }
+    case 'lead-three': {
+      const th = (I.h - g) * 0.6, bh = I.h - th - g, w = (I.w - 2 * g) / 3;
+      cells = [C(I.x, I.y, I.w, th), ...[0, 1, 2].map(k => C(I.x + k * (w + g), I.y + th + g, w, bh))];
+      break;
+    }
+    case 'lead-side': {
+      const lw = (I.w - g) * 0.6, rw = I.w - lw - g, h = (I.h - 2 * g) / 3;
+      cells = [C(I.x, I.y, lw, I.h), ...[0, 1, 2].map(k => C(I.x + lw + g, I.y + k * (h + g), rw, h))];
+      break;
+    }
+    case 'inset-three': {
+      const w = Math.round(I.w * 0.29), step = (I.w - 2 * pad - w) / 2;
+      cells = [C(I.x, I.y, I.w, I.h), ...[0, 1, 2].map(k => {
+        const { h } = inset(dims[k + 1], 0.29);
+        return C(I.x + pad + k * step, I.y + I.h - h - pad, w, h, bw);
+      })];
+      break;
+    }
+    case 'cols': {
+      const w = (I.w - g * (dims.length - 1)) / dims.length;
+      cells = dims.map((_, k) => C(I.x + k * (w + g), I.y, w, I.h));
+      break;
+    }
+    case 'rows': {
+      const h = (I.h - g * (dims.length - 1)) / dims.length;
+      cells = dims.map((_, k) => C(I.x, I.y + k * (h + g), I.w, h));
+      break;
+    }
+    case 'wide-cols': {
+      const lw = (I.w - g) * 0.64, rw = I.w - lw - g;
+      cells = [C(I.x, I.y, lw, I.h), C(I.x + lw + g, I.y, rw, I.h)];
+      break;
+    }
+    case 'wide-rows': {
+      const th = (I.h - g) * 0.64, bh = I.h - th - g;
+      cells = [C(I.x, I.y, I.w, th), C(I.x, I.y + th + g, I.w, bh)];
+      break;
+    }
+    case 'lead-bottom': {
+      const th = (I.h - g) * 0.4, bh = I.h - th - g, w = (I.w - g) / 2;
+      cells = [C(I.x, I.y + th + g, I.w, bh), C(I.x, I.y, w, th), C(I.x + w + g, I.y, w, th)];
+      break;
+    }
+    default:
+      cells = [C(I.x, I.y, I.w, I.h)];
+  }
+  if (flip) cells = cells.map(c => ({ ...c, x: I.x + I.w - (c.x - I.x) - c.w }));
+  return cells;
+}
+const REDESIGN_TPLS = {
+  2: [['halves', 0], ['wide-cols', 0], ['rows', 0], ['wide-rows', 0], ['wide-cols', 1], ['cols', 0], ['wide-rows', 1]],
+  3: [['lead-two', 0], ['lead-top', 0], ['cols', 0], ['lead-two', 1], ['lead-bottom', 0], ['rows', 0]],
+  4: [['grid', 0], ['lead-three', 0], ['lead-side', 0], ['cols', 0], ['lead-side', 1], ['rows', 0]]
+};
+const makeBoard = (ids, rand) => {
+  // Photos are grouped by orientation first, so a landscape and a portrait never share one image.
+  const o = id => { const q = byId(id); return q ? orientOf(q.w, q.h) : 'x'; };
+  const groups = {};
+  ids.forEach(id => { (groups[o(id)] = groups[o(id)] || []).push(id); });
+  const out = [];
+  Object.values(groups).forEach(g => {
+    if (g.length < 2) { out.push({ mode: 'collage', ids: g }); return; }
+    boardSlides(g, boardSlideCount(g.length)).forEach(sl => {
+      if (sl.length < 2) { out.push({ mode: 'collage', ids: sl }); return; }
+      const list = REDESIGN_TPLS[Math.min(sl.length, 4)];
+      const e = list[Math.floor(rand() * list.length)];
+      out.push({ mode: 'collage', ids: sl, tpl: e[0], flip: !!e[1] });
+    });
+  });
+  return out;
+};
+
+// Mix and match: a random, varied run of singles, pairs, trios, carousels, photo slides and collage slides.
+// The same seed gives the same feed; a new seed gives a different one. Collages only take photos of the same orientation.
+function mixPosts(photos, ratioKey, rand, picks) {
+  rand = rand || rng(1);
+  const has = k => !picks || picks.includes('mix') || picks.includes(k);
+  const plainOn = !!picks && !picks.includes('mix') && picks.includes('plain'), frameOn = !!picks && !picks.includes('mix') && picks.includes('frame');
+  const lookFor = () => plainOn && frameOn ? (rand() < 0.5 ? 'fill' : 'frame') : plainOn ? 'fill' : frameOn ? 'frame' : null;
+  const mkSingle = id => { const lk = lookFor(); return lk ? { mode: 'collage', ids: [id], look: lk } : { mode: 'collage', ids: [id] }; };
+  const R = photos.map(p => ({ id: p.id, w: p.w, h: p.h, o: orientOf(p.w, p.h) }));
+  const out = [];
+  let prev = '';
+  const randInt = (a, b) => a + Math.floor(rand() * (b - a + 1));
+  const group = n => {
+    const idx = [0];
+    for (let i = 1; i < R.length && idx.length < n; i++) if (R[i].o === R[0].o) idx.push(i);
+    return idx;
+  };
+  const takeAt = idx => { const ids = idx.map(i => R[i].id); for (let j = idx.length - 1; j >= 0; j--) R.splice(idx[j], 1); return ids; };
+  while (R.length) {
+    let opts = [];
+    if (!picks || picks.includes('mix') || plainOn || frameOn) opts.push(['single', 2.2]);
+    if (has('pair') && group(2).length >= 2) opts.push(['pair', 2.2]);
+    if (has('trio') && group(3).length >= 3) opts.push(['trio', 1.6]);
+    if (has('strips') && R.filter(r => r.o !== 'portrait').length >= 2) opts.push(['strips', 1.8]);
+    if (has('split') && R.some(r => suggestParts(r.w, r.h, ratioKey) > 1)) opts.push(['split', 1.2]);
+    if (has('carousel') && R.length >= 3) opts.push(['carousel', 1.2]);
+    if (has('board') && R.length >= 6) opts.push(['board', 1.8]);
+    if (!opts.length && has('board') && R.length >= 2) opts.push(['board', 1]);
+    if (!opts.length && has('carousel') && R.length >= 2) opts.push(['carousel', 1]);
+    if (!opts.length) opts.push(['single', 1]);
+    const fresh = opts.filter(x => x[0] !== prev);
+    if (fresh.length) opts = fresh;
+    let r = rand() * opts.reduce((a, x) => a + x[1], 0), t = opts[0][0];
+    for (const x of opts) { if (r < x[1]) { t = x[0]; break; } r -= x[1]; }
+    prev = t;
+    if (t === 'pair') out.push({ mode: 'collage', ids: takeAt(group(2)) });
+    else if (t === 'trio') out.push({ mode: 'collage', ids: takeAt(group(3)) });
+    else if (t === 'strips') {
+      const idx = R.map((r, i) => i).filter(i => R[i].o !== 'portrait').slice(0, 3);
+      out.push({ mode: 'collage', ids: takeAt(idx), strips: true });
+    }
+    else if (t === 'split') {
+      const i = R.findIndex(x => suggestParts(x.w, x.h, ratioKey) > 1);
+      const x = R.splice(i, 1)[0];
+      out.push({ mode: 'split', ids: [x.id], parts: suggestParts(x.w, x.h, ratioKey) });
+    } else if (t === 'carousel') {
+      let take = Math.min(R.length, randInt(3, 5));
+      if (take < 2) take = R.length;
+      if (R.length - take === 1) take = take < 5 ? take + 1 : take - 1;
+      out.push({ mode: 'carousel', ids: R.splice(0, take).map(x => x.id) });
+    } else if (t === 'board') {
+      let take = Math.min(R.length, randInt(Math.min(6, R.length), 12));
+      if (R.length - take === 1) take = take < 12 ? take + 1 : take - 1;
+      out.push(...makeBoard(R.splice(0, take).map(x => x.id), rand));
+    } else out.push(mkSingle(R.shift().id));
+  }
+  return out;
+}
+
+// Turns a list of photos into posts for a layout. mode is 'collage' (one image), 'carousel' (several photos as slides),
+// 'split' (one photo cut across `parts` slides) or 'board' (collage slides). seed varies the random layouts.
+function buildPosts(photos, layout, ratioKey, seed, picks) {
+  seed = seed || 1;
+  const rand = rng(seed * 7919 + 13);
+  if (picks && picks.length > 1) return mixPosts(photos, ratioKey, rand, picks);
+  const single = p => ({ mode: 'collage', ids: [p.id] });
+  if (layout === 'plain' || layout === 'frame') return photos.map(single);
+  if (layout === 'split') {
+    return photos.map(p => {
+      const n = suggestParts(p.w, p.h, ratioKey);
+      return n > 1 ? { mode: 'split', ids: [p.id], parts: n } : single(p);
+    });
+  }
+  if (layout === 'carousel') {
+    const out = [];
+    let i = 0;
+    for (const s of carouselSizes(photos.length)) {
+      const ids = photos.slice(i, i + s).map(p => p.id);
+      i += s;
+      out.push({ mode: s > 1 ? 'carousel' : 'collage', ids });
+    }
+    return out;
+  }
+  if (layout === 'board') {
+    const list = seed > 1 ? shuffled(photos, rand) : photos;
+    const out = [];
+    let i = 0;
+    for (const s of boardGroupSizes(list.length)) {
+      const ids = list.slice(i, i + s).map(p => p.id);
+      i += s;
+      if (s > 1) out.push(...makeBoard(ids, rand)); else out.push({ mode: 'collage', ids });
+    }
+    return out;
+  }
+  if (layout === 'strips') {
+    const wide = photos.filter(p => orientOf(p.w, p.h) !== 'portrait'), tall = photos.filter(p => orientOf(p.w, p.h) === 'portrait');
+    const out = [];
+    for (let i = 0; i < wide.length; i += 3) {
+      const ids = wide.slice(i, i + 3).map(p => p.id);
+      out.push(ids.length > 1 ? { mode: 'collage', ids, strips: true } : { mode: 'collage', ids });
+    }
+    tall.forEach(p => out.push({ mode: 'collage', ids: [p.id] }));
+    return out;
+  }
+  if (layout === 'mix') return mixPosts(photos, ratioKey, rand);
+  const n = layout === 'pair' ? 2 : 3;
+  const groups = {}, order = [];
+  for (const p of photos) {
+    const o = orientOf(p.w, p.h);
+    if (!groups[o]) { groups[o] = []; order.push(o); }
+    groups[o].push(p.id);
+  }
+  const out = [];
+  for (const o of order) {
+    const ids = groups[o];
+    for (let i = 0; i < ids.length; i += n) out.push({ mode: 'collage', ids: ids.slice(i, i + n) });
+  }
+  return out;
+}
+
+function coverRect(iw, ih, cell, focus) {
+  const s = Math.max(cell.w / iw, cell.h / ih);
+  const dw = iw * s, dh = ih * s;
+  let dx = cell.x + cell.w / 2 - focus.x * dw;
+  let dy = cell.y + cell.h / 2 - focus.y * dh;
+  dx = Math.min(cell.x, Math.max(cell.x + cell.w - dw, dx));
+  dy = Math.min(cell.y, Math.max(cell.y + cell.h - dh, dy));
+  return { dx, dy, dw, dh };
+}
+
+function containRect(iw, ih, cell) {
+  const s = Math.min(cell.w / iw, cell.h / ih);
+  const dw = iw * s, dh = ih * s;
+  return { dx: cell.x + (cell.w - dw) / 2, dy: cell.y + (cell.h - dh) / 2, dw, dh };
+}
+
+// o: { frame, gap, fill }; dims: [{w,h}] one per photo in the slide
+function layoutCells(kind, W, H, o, dims) {
+  const short = Math.min(W, H);
+  if (kind === 'plain') return [{ x: 0, y: 0, w: W, h: H, fit: 'cover' }];
+  if (kind === 'strips') {
+    const n = dims.length;
+    return dims.map((_, i) => {
+      const y0 = Math.round(i * H / n), y1 = Math.round((i + 1) * H / n);
+      return { x: 0, y: y0, w: W, h: y1 - y0, fit: 'cover' };
+    });
+  }
+  const m = Math.round(o.frame / 100 * short);
+  const inner = { x: m, y: m, w: W - 2 * m, h: H - 2 * m };
+  if (kind === 'frame' || dims.length === 1) return [{ ...inner, fit: 'contain' }];
+  const n = dims.length;
+  const g = Math.round(o.gap / 100 * short);
+  const colW = Math.floor((inner.w - g * (n - 1)) / n);
+  const rowH = Math.floor((inner.h - g * (n - 1)) / n);
+  const cols = [], rows = [];
+  for (let i = 0; i < n; i++) {
+    cols.push({ x: inner.x + i * (colW + g), y: inner.y, w: colW, h: inner.h });
+    rows.push({ x: inner.x, y: inner.y + i * (rowH + g), w: inner.w, h: rowH });
+  }
+  const score = cells => cells.reduce((s, c, i) => {
+    const r = containRect(dims[i].w, dims[i].h, c);
+    return s + r.dw * r.dh;
+  }, 0);
+  const pick = score(cols) >= score(rows) ? cols : rows;
+  return pick.map(c => ({ ...c, fit: o.fill ? 'cover' : 'contain' }));
+}
+
+// Finds the likely subject: the sharpest, most detailed area, with a small pull toward the centre and toward skin tones.
+function autoFocus(data, w, h) {
+  const L = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    L[i] = 0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2];
+  }
+  let sx = 0, sy = 0, sw = 0;
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const gx = L[y * w + x + 1] - L[y * w + x - 1];
+      const gy = L[(y + 1) * w + x] - L[(y - 1) * w + x];
+      const grad = Math.hypot(gx, gy);
+      const k = (y * w + x) * 4;
+      const r = data[k], gg = data[k + 1], b = data[k + 2];
+      const chroma = Math.max(r, gg, b) - Math.min(r, gg, b);
+      const skin = (r > 95 && gg > 40 && b > 20 && r > gg && r > b && (r - Math.min(gg, b)) > 15) ? 1.4 : 1;
+      const fx = x / (w - 1), fy = y / (h - 1);
+      const prior = Math.exp(-((fx - 0.5) ** 2 / (2 * 0.09) + (fy - 0.42) ** 2 / (2 * 0.09)));
+      let s = (grad + 0.25 * chroma) * skin * (0.35 + 0.65 * prior);
+      s = s * s;
+      sx += s * fx; sy += s * fy; sw += s;
+    }
+  }
+  if (sw <= 0) return { x: 0.5, y: 0.5 };
+  return { x: clamp(sx / sw, 0.12, 0.88), y: clamp(sy / sw, 0.12, 0.88) };
+}
+// ==PURE-END==
+
+const PRESETS = [
+  { name: 'Clean crop',     layout: 'plain',    bg: '#FFFFFF', frame: 0, gap: 0 },
+  { name: 'Gallery white',  layout: 'frame',    bg: '#FFFFFF', frame: 7, gap: 3 },
+  { name: 'Soft gray mat',  layout: 'frame',    bg: '#E6E6E4', frame: 9, gap: 3 },
+  { name: 'Black matte',    layout: 'frame',    bg: '#0B0B0C', frame: 6, gap: 3 },
+  { name: 'Pair on white',  layout: 'pair',     bg: '#FFFFFF', frame: 5, gap: 3 },
+  { name: 'Carousel set',   layout: 'split',    bg: '#FFFFFF', frame: 6, gap: 3 },
+  { name: 'Stacked strips', layout: 'strips',   bg: '#FFFFFF', frame: 0, gap: 0 },
+  { name: 'Mixed feed',     layout: 'mix',      bg: '#FFFFFF', frame: 6, gap: 3 }
+];
+const LAYOUTS = {
+  plain: { name: 'Crop to fill', sub: 'Edge to edge',
+    svg: '<rect x="6" y="3" width="18" height="24" rx="1.5" fill="currentColor"/>' },
+  frame: { name: 'Frame', sub: 'Whole photo, bordered',
+    svg: '<rect x="3" y="3" width="24" height="24" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="9" y="8" width="12" height="14" fill="currentColor"/>' },
+  pair:  { name: 'Pair', sub: 'Two per post',
+    svg: '<rect x="3" y="6" width="11" height="18" fill="currentColor"/><rect x="16" y="6" width="11" height="18" fill="currentColor"/>' },
+  trio:  { name: 'Trio', sub: 'Three per post',
+    svg: '<rect x="3" y="6" width="7" height="18" fill="currentColor"/><rect x="11.5" y="6" width="7" height="18" fill="currentColor"/><rect x="20" y="6" width="7" height="18" fill="currentColor"/>' },
+  split: { name: 'Carousel', sub: 'One photo across 2 or 3 slides',
+    svg: '<rect x="2" y="8" width="26" height="14" fill="currentColor"/><path d="M10.7 8v14M19.3 8v14" stroke="var(--panel)" stroke-width="1.5"/>' },
+  carousel: { name: 'Photo slides', sub: 'All photos in one post, up to 5',
+    svg: '<rect x="3" y="7" width="15" height="16" fill="currentColor"/><rect x="20" y="7" width="7" height="16" fill="currentColor" opacity=".4"/>' },
+  board: { name: 'Collage slides', sub: 'Several photos on each slide',
+    svg: '<rect x="3" y="5" width="24" height="20" rx="1" fill="currentColor" opacity=".45"/><rect x="14" y="14" width="11" height="9" fill="currentColor" stroke="var(--panel)" stroke-width="1.5"/>' },
+  strips: { name: 'Stacked strips', sub: 'Wide photos, three strips, no gaps',
+    svg: '<rect x="3" y="4" width="24" height="8" fill="currentColor"/><rect x="3" y="11" width="24" height="8" fill="currentColor" opacity=".7"/><rect x="3" y="18" width="24" height="8" fill="currentColor" opacity=".45"/>' },
+  mix: { name: 'Mix and match', sub: 'A random blend, reshuffle anytime',
+    svg: '<rect x="3" y="5" width="12" height="20" fill="currentColor"/><rect x="17" y="5" width="10" height="9" fill="currentColor"/><rect x="17" y="16" width="10" height="9" fill="currentColor"/>' }
+};
+const SWATCHES = ['#FFFFFF', '#F3EFE8', '#E6E6E4', '#0B0B0C'];
+
+const $ = id => document.getElementById(id);
+const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
+const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+const pad2 = n => String(n).padStart(2, '0');
+
+const state = {
+  photos: [], posts: [], edited: false, editing: null,
+  ratio: '4:5', layout: 'frame', single: 'frame', bg: '#FFFFFF', frame: 7, gap: 3, fill: false, scale: 3, seed: 1, combine: false, picks: ['frame']
+};
+let dl = null, ai = null, db = null, aiImages = false, aiTypes = null, refDocs = [];
+let raf = 0, busy = false, uid = 0, lastCanvases = [], capCtl = null, viewerUrl = '', viewerSave = null;
+let igIdx = 0, igSlider = null, swapSel = null;
+const nid = () => ++uid;
+const byId = id => state.photos.find(p => p.id === id);
+const postOf = photoId => state.posts.find(p => p.ids.includes(photoId));
+const maxFor = post => post.strips ? 4 : post.mode === 'board' ? MAX_BOARD : post.mode === 'carousel' ? MAX_SLIDES : post.mode === 'split' ? 1 : MAX_PER_POST;
+
+/* ---------- settings kept in this browser ---------- */
+const KEY = 'feed-frames-settings';
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (!s) return;
+    if (RATIOS[s.ratio]) state.ratio = s.ratio;
+    if (LAYOUTS[s.layout]) state.layout = s.layout;
+    if (s.single === 'plain' || s.single === 'frame') state.single = s.single;
+    if (/^#[0-9a-f]{6}$/i.test(s.bg)) state.bg = s.bg;
+    if (Number.isFinite(s.frame)) state.frame = clamp(s.frame, 0, 20);
+    if (Number.isFinite(s.gap)) state.gap = clamp(s.gap, 0, 10);
+    state.fill = !!s.fill;
+    if (s.scale === 2 || s.scale === 3) state.scale = s.scale;
+  } catch (e) { /* storage unavailable: defaults are fine */ }
+}
+function saveSettings() {
+  try {
+    const { ratio, layout, single, bg, frame, gap, fill, scale } = state;
+    localStorage.setItem(KEY, JSON.stringify({ ratio, layout, single, bg, frame, gap, fill, scale }));
+  } catch (e) { /* ignore */ }
+}
+
+/* ---------- image helpers ---------- */
+function resampleRegion(src, sx, sy, sw, sh, tw, th) {
+  let cur = src;
+  while (sw >= tw * 2 && sh >= th * 2) {
+    const nw = Math.ceil(sw / 2), nh = Math.ceil(sh / 2);
+    const c = mk(nw, nh), x = c.getContext('2d');
+    x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+    x.drawImage(cur, sx, sy, sw, sh, 0, 0, nw, nh);
+    cur = c; sx = 0; sy = 0; sw = nw; sh = nh;
+  }
+  const out = mk(tw, th), ctx = out.getContext('2d');
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(cur, sx, sy, sw, sh, 0, 0, tw, th);
+  return out;
+}
+const resample = (src, tw, th) => resampleRegion(src, 0, 0, src.width, src.height, tw, th);
+function shrink(src, long) {
+  const k = Math.min(1, long / Math.max(src.width, src.height));
+  return resample(src, Math.max(1, Math.round(src.width * k)), Math.max(1, Math.round(src.height * k)));
+}
+async function decode(file) {
+  try { return await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch (e) { return await createImageBitmap(file); }
+}
+function autoFocusFor(prev) {
+  const k = 96 / Math.max(prev.width, prev.height);
+  const w = Math.max(8, Math.round(prev.width * k)), h = Math.max(8, Math.round(prev.height * k));
+  const c = mk(w, h), x = c.getContext('2d', { willReadFrequently: true });
+  x.drawImage(prev, 0, 0, w, h);
+  return autoFocus(x.getImageData(0, 0, w, h).data, w, h);
+}
+const getFull = photo => photo.file ? decode(photo.file) : Promise.resolve(photo.canvas);
+function thumbCanvas(p, size) {
+  const c = mk(size * 2, size * 2), x = c.getContext('2d');
+  const r = coverRect(p.w, p.h, { x: 0, y: 0, w: size * 2, h: size * 2 }, p.focus);
+  x.imageSmoothingQuality = 'high';
+  x.drawImage(p.prev, r.dx, r.dy, r.dw, r.dh);
+  c.setAttribute('role', 'img'); c.setAttribute('aria-label', p.name);
+  return c;
+}
+
+/* ---------- sample frames shown on first open ---------- */
+function figure(x, cx, baseY, ht, col) {
+  x.fillStyle = col;
+  x.beginPath(); x.arc(cx, baseY - ht * 0.88, ht * 0.07, 0, Math.PI * 2); x.fill();
+  x.beginPath();
+  x.moveTo(cx - ht * 0.09, baseY - ht * 0.78); x.lineTo(cx + ht * 0.09, baseY - ht * 0.78);
+  x.lineTo(cx + ht * 0.15, baseY); x.lineTo(cx - ht * 0.15, baseY); x.closePath(); x.fill();
+}
+function makeSample(w, h, pal, sx, seed) {
+  const c = mk(w, h), x = c.getContext('2d'), rand = rng(seed);
+  const g = x.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, pal[0]); g.addColorStop(0.6, pal[1]); g.addColorStop(1, pal[2]);
+  x.fillStyle = g; x.fillRect(0, 0, w, h);
+  x.globalAlpha = 0.22; x.fillStyle = pal[3];
+  for (let i = 0; i < 14; i++) { x.beginPath(); x.arc(rand() * w, rand() * h * 0.7, 30 + rand() * 70, 0, Math.PI * 2); x.fill(); }
+  x.globalAlpha = 1;
+  x.fillStyle = pal[4]; x.fillRect(0, h * 0.84, w, h * 0.16);
+  const ht = Math.min(w, h) * 0.5;
+  figure(x, w * sx, h * 0.9, ht, pal[5]);
+  figure(x, w * sx + ht * 0.28, h * 0.9, ht * 0.92, pal[5]);
+  x.fillStyle = 'rgba(255,255,255,.75)';
+  x.font = '600 ' + Math.round(Math.min(w, h) * 0.035) + 'px sans-serif';
+  x.fillText('SAMPLE', Math.min(w, h) * 0.04, h * 0.97);
+  return c;
+}
+function makeSamples() {
+  const specs = [
+    [1500, 1000, ['#243257', '#B8674D', '#F0B36B', '#FFD9A0', '#2A2230', '#120E16'], 0.6, 11],
+    [1000, 1500, ['#6FA3B8', '#BCD3A8', '#F1E7C4', '#FFFFFF', '#41603A', '#161E14'], 0.36, 22],
+    [1500, 1000, ['#E8B7B0', '#F3D3C7', '#FBEBDD', '#FFFFFF', '#8A6A5E', '#2A1D1B'], 0.34, 33],
+    [1000, 1500, ['#0E4C5A', '#3C8C8A', '#CFE3D0', '#E9FFF4', '#1E3B3F', '#0B1618'], 0.55, 44],
+    [1500, 1000, ['#3B2A4F', '#8F5A7B', '#F2B8A2', '#FFE9D6', '#241B2E', '#0E0A12'], 0.5, 55]
+  ];
+  return specs.map((s, i) => {
+    const canvas = makeSample(s[0], s[1], s[2], s[3], s[4]);
+    const prev = shrink(canvas, 1000), auto = autoFocusFor(prev);
+    return { id: nid(), name: 'Sample ' + (i + 1), w: s[0], h: s[1], canvas, prev, auto, focus: { ...auto }, manual: false, sample: true };
+  });
+}
+
+/* ---------- posts: arrangement and editing ---------- */
+function arrange() {
+  state.posts = buildPosts(state.photos, state.layout, state.ratio, state.seed, state.combine ? state.picks : null).map(p => ({ id: nid(), ...p }));
+  state.edited = false;
+  state.editing = null;
+}
+function setLayout(k) { state.layout = k; state.combine = false; state.picks = [k]; arrange(); render(); }
+const ALL_PICKS = ['plain', 'frame', 'pair', 'trio', 'split', 'carousel', 'board', 'strips'];
+function togglePick(k) {
+  if (k === 'mix') state.picks = ALL_PICKS.slice();
+  else {
+    const i = state.picks.indexOf(k);
+    if (i >= 0) { if (state.picks.length > 1) state.picks.splice(i, 1); } else state.picks.push(k);
+  }
+  state.layout = state.picks.length === 1 ? state.picks[0] : 'mix';
+  arrange(); render();
+}
+function touched() { state.edited = true; render(); }
+function detach(photoId) {
+  const p = postOf(photoId);
+  if (!p) return;
+  p.ids = p.ids.filter(i => i !== photoId);
+  if (p.ids.length === 1 && (p.mode === 'carousel' || p.mode === 'board')) p.mode = 'collage';
+  if (!p.ids.length) {
+    state.posts = state.posts.filter(x => x !== p);
+    if (state.editing === p.id) state.editing = null;
+  }
+}
+function addTo(postId, photoId) {
+  const t = state.posts.find(p => p.id === postId);
+  if (!t || t.mode === 'split' || t.ids.length >= maxFor(t) || t.ids.includes(photoId)) return;
+  detach(photoId);
+  t.ids.push(photoId);
+  if (t.ids.length === 2 && state.layout === 'carousel') t.mode = 'carousel';
+}
+function moveTo(photoId, target) {
+  if (target === 'new') {
+    const src = postOf(photoId);
+    const at = src ? state.posts.indexOf(src) + 1 : state.posts.length;
+    detach(photoId);
+    state.posts.splice(Math.min(at, state.posts.length), 0, { id: nid(), mode: 'collage', ids: [photoId] });
+  } else {
+    addTo(Number(target), photoId);
+  }
+  touched();
+}
+function swapPhotos(a, b) {
+  if (a === b) return;
+  const pa = postOf(a), pb = postOf(b);
+  const MAPS = ['pads', 'scales', 'shapes', 'frames'];
+  const va = {}, vb = {};
+  MAPS.forEach(m => { va[m] = pa && pa[m] ? pa[m][a] : undefined; vb[m] = pb && pb[m] ? pb[m][b] : undefined; });
+  if (pa && pb) { const ia = pa.ids.indexOf(a), ib = pb.ids.indexOf(b); pa.ids[ia] = b; pb.ids[ib] = a; }
+  else if (pa) pa.ids[pa.ids.indexOf(a)] = b;
+  else if (pb) pb.ids[pb.ids.indexOf(b)] = a;
+  else return;
+  // each setting stays with its place in the post, not with the photo
+  MAPS.forEach(m => {
+    if (pa && pa[m]) { delete pa[m][a]; if (vb[m] != null) pa[m][b] = vb[m]; else delete pa[m][b]; }
+    if (pb && pb[m]) { delete pb[m][b]; if (va[m] != null) pb[m][a] = va[m]; else delete pb[m][a]; }
+  });
+  [pa, pb].forEach(q => {
+    if (q && q.mode === 'split' && q.ids.length === 1) { const ph = byId(q.ids[0]); if (ph) q.parts = Math.max(2, suggestParts(ph.w, ph.h, state.ratio)); }
+  });
+  swapSel = null; touched();
+}
+// Turn one post into another kind (single, pair, trio, four, strips, photo slides, one photo across slides).
+// Extra photos become their own posts; missing photos are taken from photos not placed, then from nearby posts.
+const RESHAPE = [
+  { k: 'single', t: 'Single', n: 1 }, { k: 'split2', t: 'One photo, 2 slides', n: 1 }, { k: 'split3', t: 'One photo, 3 slides', n: 1 },
+  { k: 'pair', t: 'Pair', n: 2 }, { k: 'trio', t: 'Trio', n: 3 }, { k: 'quad', t: 'Four', n: 4 },
+  { k: 'strips', t: 'Stacked strips', n: 3 }, { k: 'carousel', t: 'Photo slides', n: 0 }
+];
+function postKindKey(post) {
+  const n = post.ids.length;
+  if (post.mode === 'split' && n === 1) return 'split' + clamp(post.parts || 2, 2, 3);
+  if (post.mode === 'carousel' && n > 1) return 'carousel';
+  if (post.strips && n > 1) return 'strips';
+  if (post.mode === 'board' && n > 1) return '';
+  return n === 1 ? 'single' : n === 2 ? 'pair' : n === 3 ? 'trio' : n === 4 ? 'quad' : '';
+}
+function reshapePost(post, k) {
+  const def = RESHAPE.find(r => r.k === k); if (!def) return;
+  let need = def.n || (post.ids.length >= 2 ? Math.min(post.ids.length, MAX_SLIDES) : 3);
+  const pi = state.posts.indexOf(post);
+  // too many photos: the extras become single posts right after this one
+  if (post.ids.length > need) {
+    const extra = post.ids.splice(need);
+    state.posts.splice(pi + 1, 0, ...extra.map(id => ({ id: nid(), mode: 'collage', ids: [id] })));
+  }
+  // too few: pull from unplaced photos first, then from nearby posts, same orientation first
+  if (post.ids.length < need) {
+    const first = byId(post.ids[0]), o0 = first ? orientOf(first.w, first.h) : null;
+    const cands = [];
+    state.photos.forEach(ph => {
+      if (post.ids.includes(ph.id)) return;
+      const q = postOf(ph.id), same = orientOf(ph.w, ph.h) === o0 ? 0 : 100;
+      let rank;
+      if (!q) rank = same;
+      else rank = same + (q.ids.length === 1 && q.mode !== 'split' ? 10 : q.mode === 'split' ? 300 : 60) + Math.abs(state.posts.indexOf(q) - pi);
+      cands.push({ ph, rank });
+    });
+    cands.sort((a, b) => a.rank - b.rank);
+    for (const c of cands) {
+      if (post.ids.length >= need) break;
+      detach(c.ph.id);
+      post.ids.push(c.ph.id);
+    }
+  }
+  const n = post.ids.length;
+  post.strips = false; post.tpl = null; post.flip = false; post.rdn = null; post.gapW = undefined; post.pads = undefined; post.scales = undefined; post.shapes = undefined; post.frames = undefined;
+  post.nSlides = undefined; post.tseed = undefined; post.parts = undefined;
+  if (def.k === 'single') post.mode = 'collage';
+  else if (def.k === 'split2' || def.k === 'split3') { post.mode = 'split'; post.parts = def.k === 'split3' ? 3 : 2; }
+  else if (def.k === 'carousel') post.mode = n > 1 ? 'carousel' : 'collage';
+  else if (def.k === 'strips') { post.mode = 'collage'; post.strips = n > 1; }
+  else if (def.k === 'quad' && n === 4) { post.mode = 'collage'; post.tpl = REDESIGN_TPLS[4][0][0]; }
+  else post.mode = 'collage';
+  swapSel = null;
+  touched();
+}
+function reorder(post, photoId, delta) {
+  const i = post.ids.indexOf(photoId), j = i + delta;
+  if (i < 0 || j < 0 || j >= post.ids.length) return;
+  [post.ids[i], post.ids[j]] = [post.ids[j], post.ids[i]];
+  touched();
+}
+function movePostBy(post, delta) {
+  const i = state.posts.indexOf(post), j = i + delta;
+  if (i < 0 || j < 0 || j >= state.posts.length) return;
+  [state.posts[i], state.posts[j]] = [state.posts[j], state.posts[i]];
+  touched();
+}
+function deletePost(post) {
+  state.posts = state.posts.filter(p => p !== post);
+  if (state.editing === post.id) state.editing = null;
+  touched();
+}
+const unplaced = () => state.photos.filter(p => !postOf(p.id));
+
+/* ---------- slides: what gets painted and exported ---------- */
+function singleStyle() {
+  if (state.layout === 'plain') return 'plain';
+  return (state.layout === 'carousel' || state.layout === 'split' || state.layout === 'mix') ? state.single : 'frame';
+}
+const padOf = (post, id) => post.pads && post.pads[id] != null ? post.pads[id] : post.frameW;
+function slideSpecs(post) {
+  const list = slideSpecsRaw(post);
+  return list.map((sp, k) => {
+    const o = Object.assign({}, sp);
+    if (sp.kind !== 'split' && sp.kind !== 'strips') { o.scales = post.scales; o.shapes = post.shapes; o.frames = post.frames; }
+    if (sp.kind !== 'strips' && post.bgPhoto && byId(post.bgPhoto.id)) o.bgPhoto = post.bgPhoto;
+    if (post.texts && post.texts.length) o.texts = post.texts.filter(t => Math.min(t.slide || 0, list.length - 1) === k);
+    return o;
+  });
+}
+const isMulti = post => post.mode === 'carousel' || post.mode === 'split' || post.mode === 'board';
+function slideSpecsRaw(post) {
+  const ids = post.ids.filter(byId);
+  if (!ids.length) return [];
+  const bg = post.bg || state.bg;
+  const style = post.look === 'fill' ? 'plain' : post.look === 'frame' ? 'frame' : singleStyle();
+  if (post.mode === 'board' && ids.length > 1) {
+    return boardSlides(ids, post.nSlides).map((sl, k) => {
+      const t = pickTemplate(sl.length, post.tseed && post.tseed[k] != null ? post.tseed[k] : k);
+      return { kind: 'board', look: post.look || null, bg, ids: sl, tpl: t.tpl, flip: t.flip, frameW: post.frameW, gapW: post.gapW, pads: post.pads };
+    });
+  }
+  if (post.tpl && post.mode === 'collage' && !post.strips && REDESIGN_TPLS[ids.length] && REDESIGN_TPLS[ids.length].some(t => t[0] === post.tpl)) {
+    return [{ kind: 'board', look: post.look || null, bg, ids, tpl: post.tpl, flip: !!post.flip, frameW: post.frameW, gapW: post.gapW, pads: post.pads }];
+  }
+  if (post.mode === 'split' && ids.length === 1) {
+    const n = clamp(post.parts || 2, 2, 3);
+    return Array.from({ length: n }, (_, k) => ({ kind: 'split', style, bg, ids, part: k, parts: n, frameW: post.frameW }));
+  }
+  if (ids.length === 1) return [{ kind: style, bg, ids, frameW: padOf(post, ids[0]) }];
+  if (post.mode === 'carousel') return ids.map(id => ({ kind: style, bg, ids: [id], frameW: padOf(post, id) }));
+  if (post.strips && ids.length >= 2) return [{ kind: 'strips', bg, ids }];
+  return [{ kind: ids.length === 2 ? 'pair' : 'trio', look: post.look || null, bg, ids, frameW: post.frameW, gapW: post.gapW, pads: post.pads }];
+}
+const collageOpts = spec => {
+  const o = spec.look === 'fill' ? { frame: 0, gap: state.gap, fill: true }
+    : spec.look === 'frame' ? Object.assign({}, state, { fill: false }) : state;
+  const out = spec.frameW != null && spec.look !== 'fill' ? Object.assign({}, o, { frame: spec.frameW }) : o;
+  return spec.gapW != null ? Object.assign({}, out, { gap: spec.gapW }) : out;
+};
+const effLook = post => post.look || (post.mode === 'board' && post.ids.length > 1 ? 'frame' : null) || (post.ids.length > 1 && post.mode === 'collage' ? (state.fill ? 'fill' : 'frame') : (singleStyle() === 'plain' ? 'fill' : 'frame'));
+function styleCells(cells, spec, W, H) {
+  const short = Math.min(W, H);
+  return cells.map((c, i) => {
+    const id = spec.ids[i];
+    if (!c || id == null) return c;
+    let o = c;
+    const pad = spec.ids.length > 1 && spec.pads ? spec.pads[id] : 0;
+    if (pad) {
+      const m = Math.round(pad / 100 * short);
+      const w = Math.max(16, o.w - 2 * m), h = Math.max(16, o.h - 2 * m);
+      o = Object.assign({}, o, { x: Math.round(o.x + (o.w - w) / 2), y: Math.round(o.y + (o.h - h) / 2), w, h });
+    }
+    const sc = spec.scales && spec.scales[id];
+    if (sc && sc < 100) {
+      const w = Math.max(16, Math.round(o.w * sc / 100)), h = Math.max(16, Math.round(o.h * sc / 100));
+      o = Object.assign({}, o, { x: Math.round(o.x + (o.w - w) / 2), y: Math.round(o.y + (o.h - h) / 2), w, h });
+    }
+    const sh = spec.shapes && spec.shapes[id];
+    if (sh && sh !== 'original') {
+      const side = Math.min(o.w, o.h);
+      o = Object.assign({}, o, { x: Math.round(o.x + (o.w - side) / 2), y: Math.round(o.y + (o.h - side) / 2), w: side, h: side, fit: 'cover', shape: sh });
+    }
+    const fr = spec.frames && spec.frames[id];
+    if (fr && fr.w > 0) o = Object.assign({}, o, { frame: { w: Math.max(1, Math.round(fr.w / 100 * short)), color: fr.color || '#FFFFFF' } });
+    return o;
+  });
+}
+function shapePath(ctx, c, g) {
+  g = g || 0;
+  const x = c.x - g, y = c.y - g, w = c.w + 2 * g, h = c.h + 2 * g;
+  if (c.shape === 'circle') { ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2); return; }
+  if (c.shape === 'rounded') {
+    const r = Math.round(Math.min(c.w, c.h) * 0.12) + g;
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); return;
+  }
+  ctx.rect(x, y, w, h);
+}
+function drawFrame(ctx, c) {
+  if (!c.frame || !c.frame.w) return;
+  ctx.save(); ctx.fillStyle = c.frame.color || '#FFFFFF'; ctx.beginPath(); shapePath(ctx, c, c.frame.w); ctx.fill(); ctx.restore();
+}
+// a blur that works everywhere: shrink, then grow back in steps
+function blurCanvas(src, W, H, amt) {
+  if (!amt) return src;
+  const f = 1 + amt * 0.35;
+  let w = Math.max(2, Math.round(W / f)), h = Math.max(2, Math.round(H / f));
+  let cur = mk(w, h); let x = cur.getContext('2d'); x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(src, 0, 0, w, h);
+  while (w < W || h < H) {
+    const nw = Math.min(W, w * 2), nh = Math.min(H, h * 2);
+    const nx = mk(nw, nh); const c2 = nx.getContext('2d'); c2.imageSmoothingEnabled = true; c2.imageSmoothingQuality = 'high'; c2.drawImage(cur, 0, 0, nw, nh);
+    cur = nx; w = nw; h = nh;
+  }
+  return cur;
+}
+function drawBackdrop(ctx, spec, W, H, source) {
+  const bp = spec.bgPhoto, p = bp && byId(bp.id);
+  if (!p) return;
+  const base = mk(W, H), bx = base.getContext('2d');
+  bx.imageSmoothingEnabled = true; bx.imageSmoothingQuality = 'high';
+  const r = coverRect(p.w, p.h, { x: 0, y: 0, w: W, h: H }, p.focus);
+  if (source.width === p.w) { const k = source.width / r.dw; bx.drawImage(resampleRegion(source, -r.dx * k, -r.dy * k, W * k, H * k, W, H), 0, 0); }
+  else bx.drawImage(source, r.dx, r.dy, r.dw, r.dh);
+  ctx.drawImage(blurCanvas(base, W, H, bp.blur || 0), 0, 0);
+  if (bp.tint) { ctx.save(); ctx.globalAlpha = bp.tint / 100; ctx.fillStyle = spec.bg || state.bg; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+}
+
+/* ---------- text on the image ---------- */
+const FONTS = {
+  elegant: { label: 'Elegant serif', css: '"Playfair Display", Georgia, serif', weight: 400 },
+  classic: { label: 'Classic serif', css: '"Cormorant Garamond", Georgia, serif', weight: 600 },
+  script: { label: 'Script', css: '"Great Vibes", "Brush Script MT", cursive', weight: 400 },
+  modern: { label: 'Clean sans', css: 'Montserrat, "Helvetica Neue", Arial, sans-serif', weight: 400 }
+};
+const TEXT_SPOTS = {
+  'top-left': ['left', 12], 'top-center': ['center', 12], 'top-right': ['right', 12],
+  'middle-left': ['left', 50], 'middle-center': ['center', 50], 'middle-right': ['right', 50],
+  'bottom-left': ['left', 88], 'bottom-center': ['center', 88], 'bottom-right': ['right', 88]
+};
+function newTextLayer(over) {
+  return Object.assign({ id: nid(), text: 'Your text', font: 'elegant', size: 6, color: '#FFFFFF', align: 'center', x: 50, y: 88, w: 80, lh: 1.25, ls: 0, shadow: true, caps: false, slide: 0 }, over || {});
+}
+function warmFonts(texts) {
+  const used = [...new Set((texts || []).map(t => t.font))].filter(f => FONTS[f]);
+  if (!used.length || !document.fonts || !document.fonts.load) return Promise.resolve();
+  const all = Promise.all(used.map(f => document.fonts.load(FONTS[f].weight + ' 40px ' + FONTS[f].css, 'Aa')).concat([])).catch(() => {});
+  return Promise.race([all, new Promise(r => setTimeout(r, 3000))]);
+}
+function drawTexts(ctx, texts, W, H) {
+  if (!texts || !texts.length) return;
+  for (const t of texts) {
+    const raw = String(t.text || '');
+    if (!raw.trim()) continue;
+    const f = FONTS[t.font] || FONTS.elegant;
+    const px = Math.max(8, Math.round(t.size / 100 * W));
+    const track = (t.ls || 0) / 100 * px;
+    ctx.save();
+    ctx.font = f.weight + ' ' + px + 'px ' + f.css;
+    ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    ctx.fillStyle = t.color || '#FFFFFF';
+    if (t.shadow) { ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = px * 0.25; ctx.shadowOffsetY = px * 0.04; }
+    const str = t.caps ? raw.toUpperCase() : raw;
+    const widthOf = line => track ? [...line].reduce((a, ch) => a + ctx.measureText(ch).width, 0) + track * Math.max(0, [...line].length - 1) : ctx.measureText(line).width;
+    const boxW = Math.max(px, t.w / 100 * W);
+    const lines = [];
+    str.split(/\n/).forEach(par => {
+      const words = par.split(/\s+/).filter(Boolean);
+      if (!words.length) { lines.push(''); return; }
+      let cur = '';
+      words.forEach(w => {
+        const test = cur ? cur + ' ' + w : w;
+        if (cur && widthOf(test) > boxW) { lines.push(cur); cur = w; } else cur = test;
+      });
+      lines.push(cur);
+    });
+    const lineH = px * (t.lh || 1.25), total = lines.length * lineH;
+    const cx = t.x / 100 * W, boxL = cx - boxW / 2;
+    let y = t.y / 100 * H - total / 2 + lineH / 2 + px * 0.34;
+    lines.forEach(line => {
+      const lw = widthOf(line);
+      const x = t.align === 'left' ? boxL : t.align === 'right' ? boxL + boxW - lw : cx - lw / 2;
+      if (track) { let xx = x; for (const ch of line) { ctx.fillText(ch, xx, y); xx += ctx.measureText(ch).width + track; } }
+      else ctx.fillText(line, x, y);
+      y += lineH;
+    });
+    ctx.restore();
+  }
+}
+if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => { try { render(); } catch (e) { /* not ready yet */ } });
+
+function planSlide(spec, W, H) {
+  if (spec.kind === 'split') {
+    // The photo is laid out once across a virtual panorama `parts` slides wide; this slide is one window onto it.
+    const p = byId(spec.ids[0]), n = spec.parts;
+    let v;
+    if (spec.style === 'plain') {
+      v = coverRect(p.w, p.h, { x: 0, y: 0, w: n * W, h: H }, p.focus);
+    } else {
+      const m = Math.round((spec.frameW != null ? spec.frameW : state.frame) / 100 * Math.min(W, H));
+      v = containRect(p.w, p.h, { x: m, y: m, w: n * W - 2 * m, h: H - 2 * m });
+    }
+    const dx = Math.round(v.dx), dy = Math.round(v.dy), dw = Math.round(v.dw), dh = Math.round(v.dh);
+    return [{
+      photo: p,
+      cell: { x: 0, y: 0, w: W, h: H, fit: spec.style === 'plain' ? 'cover' : 'contain' },
+      rect: { dx: dx - spec.part * W, dy, dw, dh }
+    }];
+  }
+  if (spec.kind === 'board') {
+    const bp = spec.ids.map(byId);
+    const bc = boardCells(spec.tpl, W, H, { frame: spec.look === 'fill' ? 0 : (spec.frameW != null ? spec.frameW : state.frame), gap: spec.gapW != null ? spec.gapW : state.gap }, bp.map(p => ({ w: p.w, h: p.h })), spec.flip);
+    const bcp = styleCells(bc, spec, W, H);
+    return bp.map((p, i) => ({ photo: p, cell: bcp[i], rect: coverRect(p.w, p.h, bcp[i], p.focus) }));
+  }
+  const ph = spec.ids.map(byId);
+  const cells = styleCells(layoutCells(spec.kind, W, H, collageOpts(spec), ph.map(p => ({ w: p.w, h: p.h }))), spec, W, H);
+  return ph.map((p, i) => {
+    const cell = cells[i];
+    const rect = cell.fit === 'cover' ? coverRect(p.w, p.h, cell, p.focus) : containRect(p.w, p.h, cell);
+    return { photo: p, cell, rect };
+  });
+}
+const slug = () => state.ratio.replace(':', 'x');
+const postKindLabel = post => post.strips && post.ids.length > 1 ? 'Stacked strips' : post.mode === 'split' && post.ids.length === 1 ? 'Carousel, one photo' :
+  post.ids.length === 1 ? 'Single' : (post.mode === 'board' ? 'Collage slides' : post.mode === 'carousel' ? 'Photo slides' : 'Collage');
+const mixedShapes = post => post.mode === 'collage' && !post.strips && post.ids.length > 1 &&
+  new Set(post.ids.map(id => { const p = byId(id); return p ? orientOf(p.w, p.h) : 'x'; })).size > 1;
+
+function paintSlide(spec, PW, PH) {
+  const plan = planSlide(spec, PW, PH);
+  const cv = mk(PW, PH), ctx = cv.getContext('2d');
+  ctx.fillStyle = spec.bg || state.bg; ctx.fillRect(0, 0, PW, PH);
+  if (spec.bgPhoto) { const bpp = byId(spec.bgPhoto.id); if (bpp && bpp.prev) drawBackdrop(ctx, spec, PW, PH, bpp.prev); }
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+  for (const pl of plan) {
+    if (pl.cell.border) { const b = pl.cell.border; ctx.fillStyle = spec.bg || state.bg; ctx.fillRect(pl.cell.x - b, pl.cell.y - b, pl.cell.w + 2 * b, pl.cell.h + 2 * b); }
+    drawFrame(ctx, pl.cell);
+    ctx.save(); ctx.beginPath(); shapePath(ctx, pl.cell); ctx.clip();
+    ctx.drawImage(pl.photo.prev, pl.rect.dx, pl.rect.dy, pl.rect.dw, pl.rect.dh);
+    ctx.restore();
+  }
+  if (spec.texts && spec.texts.length) { warmFonts(spec.texts); drawTexts(ctx, spec.texts, PW, PH); }
+  return { cv, plan };
+}
+
+async function exportSlide(spec) {
+  const { W, H } = frameDims(state.ratio, state.scale);
+  const cv = mk(W, H), ctx = cv.getContext('2d');
+  ctx.fillStyle = spec.bg || state.bg; ctx.fillRect(0, 0, W, H);
+  if (spec.bgPhoto) {
+    const bpp = byId(spec.bgPhoto.id);
+    if (bpp) { const bsrc = await getFull(bpp); drawBackdrop(ctx, spec, W, H, bsrc); if (bpp.file && bsrc.close) bsrc.close(); }
+  }
+  for (const pl of planSlide(spec, W, H)) {
+    const { cell, rect } = pl;
+    if (cell.border) { ctx.fillStyle = spec.bg || state.bg; ctx.fillRect(cell.x - cell.border, cell.y - cell.border, cell.w + 2 * cell.border, cell.h + 2 * cell.border); }
+    drawFrame(ctx, cell);
+    const vx0 = Math.max(cell.x, rect.dx), vx1 = Math.min(cell.x + cell.w, rect.dx + rect.dw);
+    const vy0 = Math.max(cell.y, rect.dy), vy1 = Math.min(cell.y + cell.h, rect.dy + rect.dh);
+    const ix0 = Math.round(vx0), ix1 = Math.round(vx1), iy0 = Math.round(vy0), iy1 = Math.round(vy1);
+    const tw = ix1 - ix0, th = iy1 - iy0;
+    if (tw < 1 || th < 1) continue;
+    const src = await getFull(pl.photo);
+    const k = src.width / rect.dw;
+    const out = resampleRegion(src, (vx0 - rect.dx) * k, (vy0 - rect.dy) * k, (vx1 - vx0) * k, (vy1 - vy0) * k, tw, th);
+    if (cell.shape) { ctx.save(); ctx.beginPath(); shapePath(ctx, cell); ctx.clip(); ctx.drawImage(out, ix0, iy0); ctx.restore(); }
+    else ctx.drawImage(out, ix0, iy0);
+    if (pl.photo.file && src.close) src.close();
+  }
+  if (spec.texts && spec.texts.length) { await warmFonts(spec.texts); drawTexts(ctx, spec.texts, W, H); }
+  return await new Promise(res => cv.toBlob(res, 'image/jpeg', EXPORT_Q));
+}
+function fileName(i, k, n, carousel) {
+  return 'feed-frames-' + pad2(i + 1) + (carousel && n > 1 ? '-slide' + (k + 1) + 'of' + n : '') + '-' + slug() + '.jpg';
+}
+async function exportPostFiles(post, i) {
+  const specs = slideSpecs(post), files = [];
+  for (let k = 0; k < specs.length; k++) {
+    files.push({ name: fileName(i, k, specs.length, isMulti(post)), blob: await exportSlide(specs[k]) });
+  }
+  return files;
+}
+
+/* ---------- saving ---------- */
+function say(msg) { $('status').textContent = msg || ''; }
+const isTouch = () => { try { return matchMedia('(pointer: coarse)').matches; } catch (e) { return false; } };
+function anchorSave(filename, blob) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = filename; a.rel = 'noopener';
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+}
+// Outside Claude: phones open the share sheet (Save to Photos, or straight into Instagram); computers download the file.
+async function webSave(files) {
+  const fl = files.map(f => new File([f.blob], f.name, { type: f.blob.type || 'image/jpeg' }));
+  if (isTouch() && navigator.canShare && navigator.canShare({ files: fl })) {
+    try { await navigator.share({ files: fl }); say(fl.length > 1 ? 'Shared ' + fl.length + ' images.' : 'Shared.'); return 'saved'; }
+    catch (e) { if (e && e.name === 'AbortError') { say(''); return 'declined'; } }
+  }
+  for (const f of files) anchorSave(f.name, f.blob);
+  say(files.length > 1 ? 'Downloaded ' + files.length + ' files.' : 'Downloaded ' + files[0].name + '.');
+  return 'saved';
+}
+async function saveBlob(filename, blob) {
+  if (!dl) return webSave([{ name: filename, blob }]);
+  try {
+    await dl.save({ filename, data: blob });
+    say('Saved ' + filename + '.');
+    return 'saved';
+  } catch (e) {
+    const code = e && e.code;
+    if (code === 'declined') { say(''); return 'declined'; }
+    if (code === 'rate_limited') say('Another save prompt is still open. Answer it, then try again.');
+    else say('Saving is not available here right now.');
+    return 'error';
+  }
+}
+async function saveFiles(files, zipName) {
+  if (!files.length) return;
+  if (files.length === 1) { await saveBlob(files[0].name, files[0].blob); return; }
+  if (!dl && isTouch() && navigator.canShare) { await webSave(files); return; }
+  if (window.JSZip) {
+    const zip = new window.JSZip();
+    files.forEach(f => zip.file(f.name, f.blob));
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
+    await saveBlob(zipName, blob);
+    return;
+  }
+  for (const f of files) { const r = await saveBlob(f.name, f.blob); if (r !== 'saved') break; }
+}
+function setBusy(b) {
+  busy = b;
+  $('saveAll').disabled = b || !state.posts.length;
+  document.querySelectorAll('.post .btn').forEach(x => { x.disabled = b; });
+}
+async function saveOne(post, i) {
+  if (busy) return;
+  setBusy(true); say('Preparing post ' + (i + 1) + '…');
+  try {
+    const files = await exportPostFiles(post, i);
+    await saveFiles(files, 'feed-frames-' + pad2(i + 1) + '-carousel-' + slug() + '.zip');
+  } catch (e) { say('That post could not be prepared. Try the standard export size.'); }
+  setBusy(false);
+}
+async function saveAll() {
+  if (!state.posts.length || busy) return;
+  setBusy(true);
+  try {
+    const all = [];
+    for (let i = 0; i < state.posts.length; i++) {
+      say('Preparing post ' + (i + 1) + ' of ' + state.posts.length + '…');
+      all.push(...await exportPostFiles(state.posts[i], i));
+    }
+    await saveFiles(all, 'feed-frames-' + slug() + '.zip');
+  } catch (e) { say('Something went wrong while preparing the files. Try fewer photos at once.'); }
+  setBusy(false);
+}
+
+/* ---------- full size viewer ---------- */
+function openViewer(blob, caption, onSave) {
+  if (viewerUrl) URL.revokeObjectURL(viewerUrl);
+  viewerUrl = URL.createObjectURL(blob);
+  $('vimg').src = viewerUrl;
+  $('vcap').textContent = caption;
+  viewerSave = onSave || null;
+  $('vsave').hidden = !onSave;
+  $('viewer').hidden = false;
+  $('vclose').focus();
+}
+function closeViewer() {
+  $('viewer').hidden = true;
+  $('vimg').removeAttribute('src');
+  if (viewerUrl) { URL.revokeObjectURL(viewerUrl); viewerUrl = ''; }
+}
+
+/* ---------- swipeable slider (used in cards and the Instagram preview) ---------- */
+function buildSlider(nodes) {
+  const wrap = el('div', 'slider');
+  const track = el('div', 'track');
+  nodes.forEach(n => { const s = el('div', 'slide'); s.append(n); track.append(s); });
+  wrap.append(track);
+  const api = { wrap, track, index: () => track.clientWidth ? Math.round(track.scrollLeft / track.clientWidth) : 0 };
+  if (nodes.length > 1) {
+    const pill = el('span', 'pill'); pill.textContent = '1/' + nodes.length;
+    const dots = el('div', 'dotrow');
+    nodes.forEach((_, i) => dots.append(el('i', i === 0 ? 'on' : '')));
+    const prev = el('button', 'nav l'); prev.type = 'button'; prev.textContent = '‹'; prev.setAttribute('aria-label', 'Previous slide');
+    const next = el('button', 'nav r'); next.type = 'button'; next.textContent = '›'; next.setAttribute('aria-label', 'Next slide');
+    const sync = () => {
+      const i = api.index();
+      pill.textContent = (i + 1) + '/' + nodes.length;
+      [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i));
+      prev.hidden = i <= 0; next.hidden = i >= nodes.length - 1;
+    };
+    track.addEventListener('scroll', sync, { passive: true });
+    prev.addEventListener('click', () => track.scrollBy({ left: -track.clientWidth, behavior: 'smooth' }));
+    next.addEventListener('click', () => track.scrollBy({ left: track.clientWidth, behavior: 'smooth' }));
+    prev.hidden = true;
+    wrap.append(pill, prev, next, dots);
+  }
+  return api;
+}
+
+/* ---------- Instagram-style preview ---------- */
+const ICONS = {
+  heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-8-4.9-8-11A4.6 4.6 0 0 1 12 6.7a4.6 4.6 0 0 1 8 2.8c0 6.1-8 11-8 11z"/></svg>',
+  comment: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.5a8.5 8.5 0 0 1-12.4 7.5L3.5 20.5l1.5-4.4a8.5 8.5 0 1 1 15.5-4.6z"/></svg>',
+  send: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4 18-7z"/></svg>',
+  save: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h12v17l-6-4.5-6 4.5z"/></svg>'
+};
+function renderIG() {
+  const post = state.posts[igIdx];
+  const phone = $('phone');
+  phone.replaceChildren();
+  if (!post) { closeIG(); return; }
+  const { W, H } = frameDims(state.ratio, 1);
+  const PW = 720, PH = Math.round(PW * H / W);
+  const head = el('div', 'ig-head');
+  head.innerHTML = '<span class="av"></span><b>your.account</b><span class="more" aria-hidden="true">•••</span>';
+  const specs = slideSpecs(post);
+  igSlider = buildSlider(specs.map(s => paintSlide(s, PW, PH).cv));
+  const acts = el('div', 'ig-acts');
+  acts.innerHTML = ICONS.heart + ICONS.comment + ICONS.send + '<span class="sp"></span>' + ICONS.save;
+  const cap = el('p', 'ig-cap');
+  const text = ($('caption').value || '').trim();
+  const b = document.createElement('b'); b.textContent = 'your.account ';
+  cap.append(b, document.createTextNode(text || 'Your caption goes here.'));
+  if (!text) cap.classList.add('mute');
+  phone.append(head, igSlider.wrap, acts, cap);
+  $('igPos').textContent = 'Post ' + (igIdx + 1) + ' of ' + state.posts.length + ' · ' + postKindLabel(post).toLowerCase() +
+    (specs.length > 1 ? ', ' + specs.length + ' slides' : '');
+  $('igPrev').disabled = igIdx <= 0;
+  $('igNext').disabled = igIdx >= state.posts.length - 1;
+}
+function openIG(i) {
+  igIdx = clamp(i, 0, Math.max(0, state.posts.length - 1));
+  $('ig').hidden = false;
+  renderIG();
+  $('igClose').focus();
+}
+function closeIG() { $('ig').hidden = true; igSlider = null; }
+async function igFullSize() {
+  const post = state.posts[igIdx];
+  if (!post || busy) return;
+  const specs = slideSpecs(post);
+  const k = clamp(igSlider ? igSlider.index() : 0, 0, specs.length - 1);
+  setBusy(true);
+  try {
+    const blob = await exportSlide(specs[k]);
+    const { W, H } = frameDims(state.ratio, state.scale);
+    const name = fileName(igIdx, k, specs.length, isMulti(post));
+    openViewer(blob, 'Post ' + (igIdx + 1) + (specs.length > 1 ? ', slide ' + (k + 1) : '') + ' · ' + W + ' × ' + H + ' pixels', () => saveBlob(name, blob));
+  } catch (e) { say('That slide could not be prepared.'); }
+  setBusy(false);
+}
+
+/* ---------- rendering ---------- */
+function render() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; draw(); }); }
+
+function allKinds() { return state.posts.flatMap(slideSpecs).map(s => s.kind === 'split' ? s.style : s.kind); }
+
+function syncControls() {
+  document.querySelectorAll('#ratios .opt').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.ratio === state.ratio)));
+  document.querySelectorAll('#layouts .opt').forEach(b => b.setAttribute('aria-pressed', String(state.combine ? state.picks.includes(b.dataset.layout) || (b.dataset.layout === 'mix' && state.picks.length === ALL_PICKS.length) : b.dataset.layout === state.layout)));
+  $('combine').checked = state.combine;
+  document.querySelectorAll('#swatches button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.color.toLowerCase() === state.bg.toLowerCase())));
+  $('color').value = state.bg.toLowerCase();
+  $('frame').value = state.frame; $('frameOut').textContent = state.frame + '% of the short side';
+  $('gap').value = state.gap; $('gapOut').textContent = state.gap + '%';
+  $('fill').checked = state.fill;
+  $('size').value = String(state.scale);
+  $('single').value = state.single;
+  const kinds = allKinds();
+  const hasCollage = kinds.some(k => k === 'pair' || k === 'trio' || k === 'board');
+  const needBg = kinds.length ? kinds.some(k => k !== 'plain' && k !== 'strips') : (state.layout !== 'plain' && state.layout !== 'strips');
+  $('singleBox').hidden = !(state.layout === 'carousel' || state.layout === 'split' || state.layout === 'mix');
+  $('bgBox').hidden = !needBg; $('frameBox').hidden = !needBg;
+  const showCollage = hasCollage || ['pair', 'trio', 'board', 'mix'].includes(state.layout);
+  $('randomize').hidden = !(state.layout === 'mix' || state.layout === 'board');
+  document.querySelectorAll('#layouts .opt').forEach(b => { b.disabled = false; });
+  $('gapBox').hidden = !showCollage; $('fillBox').hidden = !showCollage;
+}
+
+function buildShot(spec, PW, PH) {
+  const { cv, plan } = paintSlide(spec, PW, PH);
+  const shot = el('div', 'shot');
+  cv.setAttribute('role', 'img');
+  shot.append(cv);
+  let pickable = false;
+  for (const pl of plan) {
+    if (pl.cell.fit !== 'cover') continue;
+    pickable = true;
+    const px = pl.rect.dx + pl.photo.focus.x * pl.rect.dw;
+    const py = pl.rect.dy + pl.photo.focus.y * pl.rect.dh;
+    if (px < pl.cell.x || px > pl.cell.x + pl.cell.w || py < pl.cell.y || py > pl.cell.y + pl.cell.h) continue;
+    const pin = el('span', 'pin' + (pl.photo.manual ? ' on' : ''));
+    pin.style.left = (px / PW * 100) + '%'; pin.style.top = (py / PH * 100) + '%';
+    shot.append(pin);
+  }
+  if (pickable) {
+    shot.classList.add('pick');
+    const hit = e => {
+      const r = cv.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width * PW, y = (e.clientY - r.top) / r.height * PH;
+      const pl = [...plan].reverse().find(q => q.cell.fit === 'cover' && x >= q.cell.x && x <= q.cell.x + q.cell.w && y >= q.cell.y && y <= q.cell.y + q.cell.h);
+      return pl ? { pl, x, y } : null;
+    };
+    cv.addEventListener('click', e => {
+      const h = hit(e); if (!h) return;
+      h.pl.photo.focus = { x: clamp((h.x - h.pl.rect.dx) / h.pl.rect.dw, 0, 1), y: clamp((h.y - h.pl.rect.dy) / h.pl.rect.dh, 0, 1) };
+      h.pl.photo.manual = true; render();
+    });
+    cv.addEventListener('dblclick', e => {
+      const h = hit(e); if (!h) return;
+      h.pl.photo.focus = { ...h.pl.photo.auto }; h.pl.photo.manual = false; render();
+    });
+  }
+  return { node: shot, cv };
+}
+
+function makeSelect(label, options, onPick) {
+  const s = document.createElement('select');
+  s.setAttribute('aria-label', label);
+  const first = document.createElement('option'); first.value = ''; first.textContent = label; s.append(first);
+  options.forEach(o => { const op = document.createElement('option'); op.value = o.value; op.textContent = o.text; s.append(op); });
+  s.addEventListener('change', () => { const v = s.value; s.value = ''; if (v) onPick(v); });
+  return s;
+}
+function sqButton(text, label, onClick) {
+  const b = el('button', 'sq'); b.type = 'button'; b.textContent = text; b.setAttribute('aria-label', label);
+  b.addEventListener('click', onClick);
+  return b;
+}
+function addOptions(excludePost) {
+  const opts = [];
+  unplaced().forEach(p => opts.push({ value: String(p.id), text: p.name + ' (not placed)' }));
+  state.posts.forEach((q, qi) => {
+    if (q === excludePost) return;
+    q.ids.forEach(id => { const p = byId(id); if (p) opts.push({ value: String(p.id), text: p.name + ' (post ' + (qi + 1) + ')' }); });
+  });
+  return opts;
+}
+
+function textImageBlob(post, layer) {
+  const specs = slideSpecs(post);
+  const sp = specs[Math.min(layer.slide || 0, specs.length - 1)] || specs[0];
+  if (!sp) return Promise.resolve(null);
+  const { W, H } = frameDims(state.ratio, 1);
+  const { cv } = paintSlide(Object.assign({}, sp, { texts: [] }), 540, Math.round(540 * H / W));
+  return new Promise(r => cv.toBlob(r, 'image/jpeg', 0.85));
+}
+const TEXT_KINDS = [['love', 'a short line about love'], ['name', 'a name or title for the photo'], ['caption', 'a short caption'], ['blessing', 'a warm blessing or wish']];
+function buildBackdropEditor(post, live) {
+  const wrap = el('div', 'tbox');
+  const r = el('div', 'erow');
+  const l = el('label'); l.textContent = 'Background'; l.style.fontSize = '12px'; l.htmlFor = 'bgp-' + post.id;
+  const sel = document.createElement('select'); sel.id = 'bgp-' + post.id; sel.className = 'grow';
+  sel.innerHTML = '<option value="">Plain color</option>' + state.photos.map(q => '<option value="' + q.id + '">Photo: ' + q.name.replace(/</g, '') + '</option>').join('');
+  sel.value = post.bgPhoto ? String(post.bgPhoto.id) : '';
+  sel.addEventListener('change', () => {
+    if (!sel.value) post.bgPhoto = undefined;
+    else post.bgPhoto = { id: Number(sel.value), blur: post.bgPhoto ? post.bgPhoto.blur : 40, tint: post.bgPhoto ? post.bgPhoto.tint : 20 };
+    touched();
+  });
+  r.append(l, sel); wrap.append(r);
+  if (post.bgPhoto) {
+    const sl = (key, label, max, fmt) => {
+      const rr = el('div', 'erow'); const ll = el('label'); ll.textContent = label; ll.style.fontSize = '12px';
+      const i = document.createElement('input'); i.type = 'range'; i.min = '0'; i.max = String(max); i.step = '1'; i.value = String(post.bgPhoto[key]); i.className = 'grow';
+      const o = el('span', 'val'); const show = () => { o.textContent = fmt(post.bgPhoto[key]); }; show();
+      i.addEventListener('input', () => { post.bgPhoto[key] = Number(i.value); state.edited = true; show(); live(); });
+      i.addEventListener('change', () => touched());
+      rr.append(ll, i, o); return rr;
+    };
+    wrap.append(sl('blur', 'Blur', 100, v => v ? v + '%' : 'sharp'), sl('tint', 'Tint', 90, v => v + '%'));
+    const n = el('p', 'hint2'); n.textContent = 'The photo fills the whole post behind your photos. Tint mixes in the frame color. It shows where photos are smaller than the post, or have a border.';
+    wrap.append(n);
+  }
+  return wrap;
+}
+function buildTextEditor(post, live) {
+  const wrap = el('div', 'tbox');
+  const hd = el('div', 'erow');
+  const h = el('span'); h.textContent = 'Text on the image'; h.style.cssText = 'font-size:12px;flex:1';
+  const add = el('button', 'btn'); add.type = 'button'; add.textContent = 'Add text';
+  add.addEventListener('click', () => { openSecs.text = true; post.texts = post.texts || []; post.texts.push(newTextLayer()); touched(); });
+  hd.append(h, add); wrap.append(hd);
+  const nSlides = slideSpecs(post).length;
+  (post.texts || []).forEach((t, ti) => {
+    const card = el('div', 'tlayer');
+    const ta = document.createElement('textarea'); ta.rows = 2; ta.value = t.text; ta.setAttribute('aria-label', 'Text ' + (ti + 1));
+    ta.addEventListener('input', () => { t.text = ta.value; state.edited = true; live(); });
+    card.append(ta);
+    // controls
+    const mk2 = (label, input, out) => { const r = el('div', 'erow'); const l = el('label'); l.textContent = label; l.style.fontSize = '12px'; r.append(l, input); if (out) r.append(out); return r; };
+    const range = (key, min, max, step, fmt) => {
+      const i = document.createElement('input'); i.type = 'range'; i.min = String(min); i.max = String(max); i.step = String(step); i.value = String(t[key]); i.className = 'grow';
+      const o = el('span', 'val'); const show = () => { o.textContent = fmt(t[key]); }; show();
+      i.addEventListener('input', () => { t[key] = Number(i.value); state.edited = true; show(); live(); });
+      i.addEventListener('change', () => touched());
+      return { i, o };
+    };
+    const fs = document.createElement('select'); fs.className = 'grow';
+    fs.innerHTML = Object.keys(FONTS).map(k => '<option value="' + k + '">' + FONTS[k].label + '</option>').join('');
+    fs.value = t.font; fs.setAttribute('aria-label', 'Font');
+    fs.addEventListener('change', () => { t.font = fs.value; touched(); });
+    card.append(mk2('Font', fs));
+    const sz = range('size', 2, 16, 0.5, v => v + '%'); card.append(mk2('Size', sz.i, sz.o));
+    const ci = document.createElement('input'); ci.type = 'color'; ci.value = t.color.toLowerCase(); ci.setAttribute('aria-label', 'Text color');
+    ci.addEventListener('change', () => { t.color = ci.value.toUpperCase(); touched(); });
+    const crow = mk2('Color', ci);
+    ['#FFFFFF', '#F3EFE8', '#0B0B0C', '#C9A24B', '#B3202A'].forEach(c => {
+      const b = el('button', 'btn'); b.type = 'button'; b.title = c; b.setAttribute('aria-label', 'Text color ' + c);
+      b.style.cssText = 'width:24px;height:24px;padding:0;border-radius:50%;background:' + c;
+      b.addEventListener('click', () => { t.color = c; touched(); }); crow.append(b);
+    });
+    card.append(crow);
+    // alignment
+    const ar = el('div', 'erow'); const al = el('label'); al.textContent = 'Align'; al.style.fontSize = '12px'; ar.append(al);
+    [['left', 'Left'], ['center', 'Center'], ['right', 'Right']].forEach(([v, lab]) => {
+      const b = el('button', 'btn'); b.type = 'button'; b.textContent = lab; b.setAttribute('aria-pressed', String(t.align === v));
+      b.addEventListener('click', () => { t.align = v; touched(); }); ar.append(b);
+    });
+    card.append(ar);
+    // position presets 3 x 3
+    const pr = el('div', 'erow'); const pl = el('label'); pl.textContent = 'Place'; pl.style.fontSize = '12px'; pr.append(pl);
+    const grid = el('div', 'tgrid');
+    Object.keys(TEXT_SPOTS).forEach(k => {
+      const b = el('button', 'btn'); b.type = 'button'; b.setAttribute('aria-label', 'Place text ' + k.replace('-', ' '));
+      b.setAttribute('aria-pressed', String(t.y === TEXT_SPOTS[k][1] && t.align === TEXT_SPOTS[k][0]));
+      b.addEventListener('click', () => { t.align = TEXT_SPOTS[k][0]; t.y = TEXT_SPOTS[k][1]; touched(); }); grid.append(b);
+    });
+    pr.append(grid); card.append(pr);
+    const px = range('x', 0, 100, 1, v => v + '%'); card.append(mk2('Across', px.i, px.o));
+    const py = range('y', 0, 100, 1, v => v + '%'); card.append(mk2('Down', py.i, py.o));
+    const pw = range('w', 20, 100, 1, v => v + '%'); card.append(mk2('Width', pw.i, pw.o));
+    const lh = range('lh', 0.9, 2, 0.05, v => v.toFixed(2)); card.append(mk2('Lines', lh.i, lh.o));
+    const ls = range('ls', 0, 30, 1, v => v + '%'); card.append(mk2('Letters', ls.i, ls.o));
+    const opt = el('div', 'erow');
+    const c1 = document.createElement('label'); c1.className = 'check';
+    const cb1 = document.createElement('input'); cb1.type = 'checkbox'; cb1.checked = !!t.shadow;
+    cb1.addEventListener('change', () => { t.shadow = cb1.checked; touched(); });
+    const s1 = document.createElement('span'); s1.textContent = 'Soft shadow'; c1.append(cb1, s1);
+    const c2 = document.createElement('label'); c2.className = 'check';
+    const cb2 = document.createElement('input'); cb2.type = 'checkbox'; cb2.checked = !!t.caps;
+    cb2.addEventListener('change', () => { t.caps = cb2.checked; touched(); });
+    const s2 = document.createElement('span'); s2.textContent = 'Capitals'; c2.append(cb2, s2);
+    opt.append(c1, c2); card.append(opt);
+    if (nSlides > 1) {
+      const ss = document.createElement('select'); ss.className = 'grow'; ss.setAttribute('aria-label', 'Slide');
+      ss.innerHTML = Array.from({ length: nSlides }, (_, k) => '<option value="' + k + '">Slide ' + (k + 1) + '</option>').join('');
+      ss.value = String(Math.min(t.slide || 0, nSlides - 1));
+      ss.addEventListener('change', () => { t.slide = Number(ss.value); touched(); });
+      card.append(mk2('On', ss));
+    }
+    // write the wording with Claude
+    const wr = el('div', 'erow');
+    const ks = document.createElement('select'); ks.className = 'grow'; ks.setAttribute('aria-label', 'What to write');
+    ks.innerHTML = TEXT_KINDS.map(k => '<option value="' + k[0] + '">' + k[1] + '</option>').join('');
+    const about = document.createElement('input'); about.type = 'text'; about.style.cssText = 'flex:1 1 100%;min-width:0'; about.placeholder = 'Optional: a name or a note'; about.maxLength = 80;
+    about.setAttribute('aria-label', 'Name or note for the text');
+    const gen = el('button', 'btn primary'); gen.type = 'button'; gen.textContent = 'Suggest with Claude';
+    const msg = el('p', 'hint2'); msg.setAttribute('role', 'status');
+    const opts = el('div', 'topts');
+    gen.addEventListener('click', async () => {
+      const g = window.__ffAI ? window.__ffAI() : null;
+      if (!g || !g.ai) { msg.textContent = 'This needs Claude. Inside Claude it works as is. On other sites, add your Claude API key under Caption, then try again.'; return; }
+      gen.disabled = true; msg.textContent = 'Looking at the photo and writing options…'; opts.replaceChildren();
+      try {
+        const blob = g.aiImg ? await textImageBlob(post, t) : null;
+        const kind = TEXT_KINDS.find(k => k[0] === ks.value)[1];
+        const prompt = [
+          'You write short text that is printed on an Instagram photo by a professional photographer.',
+          blob ? 'Look at the attached photo first and let its mood, light and setting shape the wording.' : 'You cannot see the photo.',
+          'Write three clearly different options, each ' + kind + '.',
+          about.value.trim() ? 'The photographer says: ' + about.value.trim().slice(0, 80) + '. If this is a name, use it exactly.' : 'Never guess or invent anyone\'s name.',
+          'Each option is at most 60 characters, or two short lines separated by a newline. No hashtags and no emoji. Do not mention anything you cannot see.',
+          'Reply with JSON only: {"options":[string,string,string]}'
+        ].join('\n');
+        const r = await g.ai.json(prompt, { images: blob ? [blob] : undefined, modelTier: 'default', cache: false });
+        const list = (r && Array.isArray(r.options) ? r.options : []).filter(x => typeof x === 'string' && x.trim()).slice(0, 3);
+        if (!list.length) throw new Error('empty');
+        msg.textContent = 'Pick one to use it, or press again for new ideas.';
+        list.forEach(o => {
+          const b = el('button', 'btn'); b.type = 'button'; b.textContent = o.trim().slice(0, 90);
+          b.addEventListener('click', () => { t.text = o.trim().slice(0, 90); touched(); });
+          opts.append(b);
+        });
+      } catch (e) { msg.textContent = 'Could not get suggestions just now. You can type your own text.'; }
+      gen.disabled = false;
+    });
+    wr.append(ks); card.append(wr);
+    const wr2 = el('div', 'erow'); wr2.append(about, gen); card.append(wr2, msg, opts);
+    const rm = el('button', 'btn'); rm.type = 'button'; rm.textContent = 'Remove this text';
+    rm.addEventListener('click', () => { post.texts.splice(ti, 1); touched(); });
+    card.append(rm);
+    wrap.append(card);
+  });
+  return wrap;
+}
+const openSecs = { layout: true };
+function section(key, title, hint, body) {
+  const d = document.createElement('details'); d.className = 'esec'; d.open = !!openSecs[key];
+  const sm = document.createElement('summary');
+  const t = document.createElement('span'); t.className = 'st'; t.textContent = title;
+  const h = document.createElement('span'); h.className = 'sh'; h.textContent = hint || '';
+  sm.append(t, h);
+  d.addEventListener('toggle', () => { openSecs[key] = d.open; });
+  d.append(sm, body);
+  return d;
+}
+function buildEdit(post, i, live) {
+  const box = el('div', 'edit');
+  const bLayout = el('div', 'sbody'), bPhotos = el('div', 'sbody'), bText = el('div', 'sbody'), bBack = el('div', 'sbody'), bStyle = el('div', 'sbody');
+  {
+    const cur = postKindKey(post);
+    const r0 = el('div', 'erow'); r0.style.flexWrap = 'wrap';
+    const l0 = el('span'); l0.textContent = 'Change this post to'; l0.style.cssText = 'font-size:12px;width:100%';
+    r0.append(l0);
+    RESHAPE.forEach(d => {
+      const b = el('button', 'btn'); b.type = 'button'; b.textContent = d.t;
+      b.setAttribute('aria-pressed', String(cur === d.k));
+      b.addEventListener('click', () => reshapePost(post, d.k));
+      r0.append(b);
+    });
+    bLayout.append(r0);
+  }
+  {
+    const row = el('div', 'erow');
+    const lab = el('label'); lab.textContent = 'Type'; lab.htmlFor = 'mode-' + post.id;
+    const sel = document.createElement('select'); sel.id = 'mode-' + post.id; sel.className = 'grow';
+    const nIds = post.ids.length, optList = [];
+    if (nIds === 1) optList.push(['collage', 'Single image'], ['split', 'Carousel, one photo across slides']);
+    else {
+      if (nIds <= MAX_PER_POST) optList.push(['collage', 'Collage, one image']);
+      if (nIds <= 4) optList.push(['strips', 'Stacked strips, no gaps']);
+      optList.push(['board', 'Collage slides, several photos per slide']);
+      if (nIds <= MAX_SLIDES) optList.push(['carousel', 'Photo slides, swipe']);
+    }
+    sel.innerHTML = optList.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('');
+    const want = nIds === 1 ? (post.mode === 'split' ? 'split' : 'collage')
+      : (post.mode === 'board' ? 'board' : post.mode === 'carousel' ? 'carousel' : post.strips ? 'strips' : 'collage');
+    sel.value = optList.some(o => o[0] === want) ? want : optList[0][0];
+    sel.addEventListener('change', () => {
+      post.strips = sel.value === 'strips'; post.tpl = null; post.gapW = undefined;
+      post.mode = sel.value === 'strips' ? 'collage' : sel.value;
+      if (post.mode === 'board') { post.nSlides = undefined; post.tseed = Array.from({ length: 5 }, () => Math.floor(Math.random() * 1000)); }
+      if (post.mode === 'split') {
+        const p = byId(post.ids[0]);
+        post.parts = Math.max(2, p ? suggestParts(p.w, p.h, state.ratio) : 2);
+      }
+      touched();
+    });
+    row.append(lab, sel); bLayout.append(row);
+    if (post.mode === 'split' && post.ids.length === 1) {
+      const r2 = el('div', 'erow');
+      const l2 = el('label'); l2.textContent = 'Slides'; l2.htmlFor = 'parts-' + post.id;
+      const ps = document.createElement('select'); ps.id = 'parts-' + post.id; ps.className = 'grow';
+      ps.innerHTML = '<option value="2">2 slides</option><option value="3">3 slides</option>';
+      ps.value = String(clamp(post.parts || 2, 2, 3));
+      ps.addEventListener('change', () => { post.parts = Number(ps.value); touched(); });
+      r2.append(l2, ps); bLayout.append(r2);
+    }
+  }
+  if (post.mode === 'board' && post.ids.length > 1) bLayout.append(buildBoardEditor(post));
+  const ul = el('ul', 'plist');
+  post.ids.forEach((pid, k) => {
+    const p = byId(pid); if (!p) return;
+    const li = el('li');
+    const nm = el('span', 'nm'); nm.textContent = p.name; nm.title = p.name;
+    li.append(thumbCanvas(p, 18), nm);
+    const ctl = el('div', 'ctl');
+    const left = sqButton('←', 'Move ' + p.name + ' earlier', () => reorder(post, pid, -1)); left.disabled = k === 0;
+    const right = sqButton('→', 'Move ' + p.name + ' later', () => reorder(post, pid, 1)); right.disabled = k === post.ids.length - 1;
+    const dest = [];
+    state.posts.forEach((q, qi) => { if (q !== post && q.mode !== 'split' && q.ids.length < maxFor(q)) dest.push({ value: String(q.id), text: 'Post ' + (qi + 1) }); });
+    if (post.ids.length > 1) dest.push({ value: 'new', text: 'A new post' });
+    const mv = makeSelect('Move to…', dest, v => moveTo(pid, v));
+    const rm = sqButton('×', 'Take ' + p.name + ' out of this post', () => { detach(pid); touched(); });
+    const swapOpts = [];
+    state.photos.forEach(q => {
+      if (q.id === pid) return;
+      const qp = postOf(q.id);
+      swapOpts.push({ value: String(q.id), text: q.name + (qp ? ' (post ' + (state.posts.indexOf(qp) + 1) + ')' : ' (not placed)') });
+    });
+    const sw = makeSelect('Swap with…', swapOpts, v => swapPhotos(pid, Number(v)));
+    ctl.append(left, right, mv, sw, rm);
+    li.append(ctl);
+    if (post.ids.length > 1 && !post.strips) {
+      const multiCell = post.mode !== 'carousel';
+      const dflt = multiCell ? 0 : (post.frameW != null ? post.frameW : state.frame);
+      const pr = el('div', 'ctl');
+      const pl = el('label'); pl.textContent = 'Space around'; pl.htmlFor = 'pad-' + post.id + '-' + pid; pl.style.fontSize = '12px';
+      const pi = document.createElement('input'); pi.type = 'range'; pi.min = '0'; pi.max = '20'; pi.step = '1';
+      pi.id = 'pad-' + post.id + '-' + pid; pi.style.flex = '1'; pi.style.minWidth = '0';
+      const cur = () => post.pads && post.pads[pid] != null ? post.pads[pid] : dflt;
+      pi.value = String(cur());
+      const po = el('span', 'val');
+      const showP = () => { po.textContent = cur() + '%' + (post.pads && post.pads[pid] != null ? '' : (multiCell ? ' (none)' : ' (post)')); };
+      showP();
+      pi.addEventListener('input', () => { post.pads = post.pads || {}; post.pads[pid] = Number(pi.value); state.edited = true; showP(); live(); });
+      pi.addEventListener('change', () => touched());
+      pr.append(pl, pi, po);
+      if (post.pads && post.pads[pid] != null) {
+        const rb = el('button', 'btn'); rb.type = 'button'; rb.textContent = 'Reset';
+        rb.addEventListener('click', () => { delete post.pads[pid]; touched(); });
+        pr.append(rb);
+      }
+      li.append(pr);
+    }
+    if (!post.strips) {
+      const sr = el('div', 'ctl');
+      const shl = el('label'); shl.textContent = 'Shape'; shl.style.fontSize = '12px'; shl.htmlFor = 'shape-' + post.id + '-' + pid;
+      const shs = document.createElement('select'); shs.id = 'shape-' + post.id + '-' + pid; shs.style.cssText = 'flex:0 0 auto;width:auto';
+      shs.innerHTML = '<option value="original">Original</option><option value="square">Square</option><option value="circle">Circle</option><option value="rounded">Rounded</option>';
+      shs.value = (post.shapes && post.shapes[pid]) || 'original';
+      shs.addEventListener('change', () => { post.shapes = post.shapes || {}; if (shs.value === 'original') delete post.shapes[pid]; else post.shapes[pid] = shs.value; touched(); });
+      const szl = el('label'); szl.textContent = 'Size'; szl.style.fontSize = '12px'; szl.htmlFor = 'size-' + post.id + '-' + pid;
+      const szi = document.createElement('input'); szi.type = 'range'; szi.min = '30'; szi.max = '100'; szi.step = '1'; szi.style.flex = '1 1 110px'; szi.style.minWidth = '0';
+      szi.id = 'size-' + post.id + '-' + pid;
+      const curS = () => post.scales && post.scales[pid] != null ? post.scales[pid] : 100;
+      szi.value = String(curS());
+      const szo = el('span', 'val'); const showS = () => { szo.textContent = curS() + '%'; }; showS();
+      szi.addEventListener('input', () => { post.scales = post.scales || {}; post.scales[pid] = Number(szi.value); state.edited = true; showS(); live(); });
+      szi.addEventListener('change', () => touched());
+      sr.append(shl, shs, szl, szi, szo);
+      li.append(sr);
+      // a frame hugging this photo, with its own width and colour
+      const fr = el('div', 'ctl');
+      const frl = el('label'); frl.textContent = 'Photo frame'; frl.style.fontSize = '12px'; frl.htmlFor = 'pframe-' + post.id + '-' + pid;
+      const cur = () => (post.frames && post.frames[pid]) || { w: 0, color: '#FFFFFF' };
+      const fri = document.createElement('input'); fri.type = 'range'; fri.min = '0'; fri.max = '8'; fri.step = '0.25'; fri.value = String(cur().w);
+      fri.id = 'pframe-' + post.id + '-' + pid; fri.style.flex = '1 1 110px'; fri.style.minWidth = '0';
+      const fro = el('span', 'val'); const showF = () => { fro.textContent = cur().w ? cur().w + '%' : 'none'; }; showF();
+      const setF = (patch) => { post.frames = post.frames || {}; post.frames[pid] = Object.assign({ w: 0, color: '#FFFFFF' }, post.frames[pid], patch); };
+      fri.addEventListener('input', () => { setF({ w: Number(fri.value) }); state.edited = true; showF(); live(); });
+      fri.addEventListener('change', () => touched());
+      const frc = document.createElement('input'); frc.type = 'color'; frc.value = cur().color.toLowerCase(); frc.setAttribute('aria-label', 'Frame color for ' + p.name);
+      frc.addEventListener('change', () => { setF({ color: frc.value.toUpperCase() }); touched(); });
+      fr.append(frl, fri, fro, frc);
+      ['#FFFFFF', '#0B0B0C', '#F3EFE8', '#C9A24B'].forEach(c => {
+        const b = el('button', 'btn'); b.type = 'button'; b.title = c; b.setAttribute('aria-label', 'Frame color ' + c);
+        b.style.cssText = 'width:22px;height:22px;padding:0;border-radius:50%;background:' + c;
+        b.addEventListener('click', () => { setF({ color: c, w: cur().w || 2 }); touched(); });
+        fr.append(b);
+      });
+      li.append(fr);
+    }
+    ul.append(li);
+  });
+  bPhotos.append(ul);
+  bText.append(buildTextEditor(post, live));
+  if (post.mode !== 'split' && post.ids.length < maxFor(post)) {
+    const opts = addOptions(post);
+    if (opts.length) {
+      const row = el('div', 'erow');
+      const add = makeSelect('Add a photo…', opts, v => { addTo(post.id, Number(v)); touched(); });
+      add.className = 'grow';
+      row.append(add); bPhotos.append(row);
+    }
+  }
+  {
+    const r3 = el('div', 'erow');
+    const l3 = el('label'); l3.textContent = 'Style'; l3.htmlFor = 'look-' + post.id;
+    const ls = document.createElement('select'); ls.id = 'look-' + post.id; ls.className = 'grow';
+    ls.innerHTML = '<option value="">Same as page</option><option value="frame">Frame, whole photos</option><option value="fill">Crop to fill, no frame</option>';
+    ls.value = post.look || '';
+    ls.addEventListener('change', () => { post.look = ls.value || null; touched(); });
+    r3.append(l3, ls); bStyle.append(r3);
+    if (effLook(post) === 'frame') {
+      const r4 = el('div', 'erow');
+      const l4 = el('label'); l4.textContent = 'Frame color'; l4.htmlFor = 'bg-' + post.id;
+      const ci = document.createElement('input'); ci.type = 'color'; ci.id = 'bg-' + post.id;
+      ci.value = (post.bg || state.bg).toLowerCase();
+      ci.addEventListener('change', () => { post.bg = ci.value.toUpperCase(); touched(); });
+      r4.append(l4, ci);
+      SWATCHES.forEach(c => {
+        const b = el('button', 'btn'); b.type = 'button'; b.title = c; b.setAttribute('aria-label', 'Frame color ' + c);
+        b.style.cssText = 'width:26px;height:26px;padding:0;border-radius:50%;background:' + c;
+        b.addEventListener('click', () => { post.bg = c; touched(); });
+        r4.append(b);
+      });
+      if (post.bg) {
+        const rs = el('button', 'btn'); rs.type = 'button'; rs.textContent = 'Use page color';
+        rs.addEventListener('click', () => { post.bg = null; touched(); });
+        r4.append(rs);
+      }
+      bStyle.append(r4);
+    }
+  }
+  bBack.append(buildBackdropEditor(post, live));
+  {
+    const nIds = post.ids.length;
+    const framed = !post.strips && post.look !== 'fill' && !(nIds === 1 && effLook(post) === 'fill');
+    const gapped = !post.strips && nIds > 1 && post.mode !== 'carousel' && post.mode !== 'split';
+    const slider = (key, label, max, pageVal, unit) => {
+      const r = el('div', 'erow');
+      const l = el('label'); l.textContent = label; l.htmlFor = key + '-' + post.id;
+      const inp = document.createElement('input'); inp.type = 'range'; inp.min = '0'; inp.max = String(max); inp.step = '1';
+      inp.id = key + '-' + post.id; inp.className = 'grow';
+      inp.value = String(post[key] != null ? post[key] : pageVal);
+      const out = el('span', 'val');
+      const show = () => { out.textContent = (post[key] != null ? post[key] : pageVal) + '%' + (post[key] == null ? ' (page)' : ''); };
+      show();
+      inp.addEventListener('input', () => { post[key] = Number(inp.value); state.edited = true; show(); live(); });
+      inp.addEventListener('change', () => { touched(); });
+      r.append(l, inp, out);
+      if (post[key] != null) {
+        const rs = el('button', 'btn'); rs.type = 'button'; rs.textContent = 'Use page value';
+        rs.addEventListener('click', () => { post[key] = undefined; touched(); });
+        r.append(rs);
+      }
+      return r;
+    };
+    if (framed) bStyle.append(slider('frameW', 'Border', 20, state.frame));
+    if (gapped) bStyle.append(slider('gapW', 'Gap', 10, state.gap));
+  }
+  const row = el('div', 'erow');
+  const up = el('button', 'btn'); up.type = 'button'; up.textContent = 'Post earlier'; up.disabled = i === 0;
+  up.addEventListener('click', () => movePostBy(post, -1));
+  const down = el('button', 'btn'); down.type = 'button'; down.textContent = 'Post later'; down.disabled = i === state.posts.length - 1;
+  down.addEventListener('click', () => movePostBy(post, 1));
+  const del = el('button', 'btn'); del.type = 'button'; del.textContent = 'Delete post';
+  del.addEventListener('click', () => deletePost(post));
+  row.append(up, down, del);
+  const nTx = (post.texts || []).length;
+  box.append(
+    section('layout', 'Change this post', postKindLabel(post), bLayout),
+    section('photos', 'Photos', post.ids.length + (post.ids.length === 1 ? ' photo' : ' photos'), bPhotos),
+    section('text', 'Text', nTx ? nTx + (nTx === 1 ? ' layer' : ' layers') : 'none', bText),
+    section('bg', 'Background', post.bgPhoto ? 'photo' : 'plain color', bBack),
+    section('style', 'Style and spacing', '', bStyle),
+    row
+  );
+  return box;
+}
+
+const PORTRAIT_LOOKS = [
+  { look: 'fill' }, { look: 'frame', frameW: 4 }, { look: 'frame', frameW: 10 }, { look: 'frame', frameW: 15 },
+  { look: 'frame', frameW: 8, bg: '#F3EFE8' }, { look: 'frame', frameW: 8, bg: '#0B0B0C' }
+];
+const LANDSCAPE_LOOKS = [
+  { look: 'frame', frameW: 0 }, { look: 'frame', frameW: 3 }, { look: 'frame', frameW: 7 },
+  { look: 'frame', frameW: 3, bg: '#F3EFE8' }, { look: 'frame', frameW: 3, bg: '#0B0B0C' }
+];
+const SPLIT_LOOKS = [{ parts: 2, look: 'frame' }, { parts: 3, look: 'frame' }, { parts: 2, look: 'fill' }, { parts: 3, look: 'fill' }];
+// Steps through a list starting at a random place, so each press gives a different result from the last one.
+function nextOf(list, post) {
+  post.rdn = post.rdn == null ? Math.floor(Math.random() * list.length) : (post.rdn + 1) % list.length;
+  return list[post.rdn % list.length];
+}
+function applyLook(post, e) {
+  post.look = e.look; post.frameW = e.frameW; post.bg = e.bg || null;
+}
+function redesignPost(post) {
+  const ids = post.ids.filter(byId);
+  if (!ids.length) return;
+  swapSel = null;
+  if (post.mode === 'board' && ids.length > 1) {
+    post.ids = shuffled(post.ids, Math.random);
+    post.tseed = Array.from({ length: 5 }, () => Math.floor(Math.random() * 1000));
+  } else if (post.mode === 'split' && ids.length === 1) {
+    const e = nextOf(SPLIT_LOOKS, post);
+    post.parts = e.parts; post.look = e.look; post.frameW = undefined; post.bg = null;
+  } else if (post.mode === 'carousel' && ids.length > 1) {
+    applyLook(post, nextOf(PORTRAIT_LOOKS, post));
+    post.ids = shuffled(post.ids, Math.random);
+  } else if (post.strips && ids.length > 1) {
+    const before = post.ids.join(',');
+    for (let k = 0; k < 6 && post.ids.join(',') === before; k++) post.ids = shuffled(post.ids, Math.random);
+  } else if (ids.length === 1) {
+    const p = byId(ids[0]);
+    applyLook(post, nextOf(p && orientOf(p.w, p.h) === 'landscape' ? LANDSCAPE_LOOKS : PORTRAIT_LOOKS, post));
+  } else if (REDESIGN_TPLS[ids.length]) {
+    const e = nextOf(REDESIGN_TPLS[ids.length], post);
+    post.tpl = e[0]; post.flip = !!e[1];
+    post.gapW = [3, 0, 5][post.rdn % 3];
+    post.look = null; post.frameW = undefined;
+    post.ids = ids.slice(1).concat(ids[0]);
+  }
+}
+function redesign(post, i) {
+  redesignPost(post);
+  say('Post ' + (i + 1) + ' redesigned. Press Redesign again for another look.');
+  touched();
+}
+function redesignAll() {
+  state.posts.forEach(redesignPost);
+  say('Every post redesigned.');
+  touched();
+}
+function shuffleBoard(post) {
+  post.ids = shuffled(post.ids, Math.random);
+  post.tseed = Array.from({ length: 5 }, () => Math.floor(Math.random() * 1000));
+  swapSel = null;
+  touched();
+}
+function buildBoardEditor(post) {
+  const wrap = el('div', 'bedit');
+  const lim = boardSlideLimits(post.ids.length);
+  const slides = boardSlides(post.ids, post.nSlides);
+  const r1 = el('div', 'erow');
+  const l1 = el('label'); l1.textContent = 'Slides'; l1.htmlFor = 'ns-' + post.id;
+  const ns = document.createElement('select'); ns.id = 'ns-' + post.id; ns.className = 'grow';
+  for (let n = lim.min; n <= lim.max; n++) { const o = document.createElement('option'); o.value = String(n); o.textContent = n + (n === 1 ? ' slide' : ' slides'); ns.append(o); }
+  ns.value = String(slides.length);
+  ns.addEventListener('change', () => { post.nSlides = Number(ns.value); touched(); });
+  const sh = el('button', 'btn'); sh.type = 'button'; sh.textContent = 'Shuffle all';
+  sh.addEventListener('click', () => shuffleBoard(post));
+  r1.append(l1, ns, sh); wrap.append(r1);
+  const note = el('p', 'hint'); note.textContent = 'Tap a photo, then tap another to swap them. The first photo on each slide is the large one.';
+  wrap.append(note);
+  slides.forEach((sl, k) => {
+    const row = el('div', 'erow'); row.style.flexWrap = 'wrap'; row.style.alignItems = 'center';
+    const lab = el('span'); lab.textContent = 'Slide ' + (k + 1); lab.style.minWidth = '4.5em';
+    row.append(lab);
+    sl.forEach((pid, j) => {
+      const p = byId(pid); if (!p) return;
+      const b = el('button'); b.type = 'button';
+      const on = swapSel && swapSel.post === post.id && swapSel.id === pid;
+      b.style.cssText = 'padding:0;line-height:0;background:none;cursor:pointer;border-radius:6px;border:2px solid ' + (on ? 'var(--accent)' : 'var(--line)');
+      b.setAttribute('aria-pressed', String(!!on));
+      b.setAttribute('aria-label', p.name + (j === 0 ? ' (large photo)' : '') + (on ? ', selected, tap another photo to swap' : ', tap to select'));
+      const c = thumbCanvas(p, j === 0 ? 28 : 20); c.style.borderRadius = '4px';
+      c.style.width = (j === 0 ? 56 : 40) + 'px'; c.style.height = (j === 0 ? 56 : 40) + 'px';
+      b.append(c);
+      b.addEventListener('click', () => {
+        if (!on && !(swapSel && swapSel.post === post.id)) { swapSel = { post: post.id, id: pid }; render(); return; }
+        if (swapSel.id === pid) { swapSel = null; render(); return; }
+        const x = post.ids.indexOf(swapSel.id), y = post.ids.indexOf(pid);
+        [post.ids[x], post.ids[y]] = [post.ids[y], post.ids[x]];
+        swapSel = null; touched();
+      });
+      row.append(b);
+    });
+    if ((BOARD_TPLS[sl.length] || []).length > 1) {
+      const nl = el('button', 'btn'); nl.type = 'button'; nl.textContent = 'New layout';
+      nl.addEventListener('click', () => {
+        post.tseed = post.tseed || [];
+        for (let q = 0; q < slides.length; q++) if (post.tseed[q] == null) post.tseed[q] = q;
+        post.tseed[k] += 1; touched();
+      });
+      row.append(nl);
+    }
+    wrap.append(row);
+  });
+  return wrap;
+}
+
+function buildCard(post, i, PW, PH, W, H) {
+  const card = el('article', 'post');
+  const specs = slideSpecs(post);
+  const shots = specs.map(s => buildShot(s, PW, PH));
+  if (shots.length) lastCanvases.push(shots[0].cv);
+  shots.forEach((s, k) => s.cv.setAttribute('aria-label', 'Post ' + (i + 1) + (shots.length > 1 ? ', slide ' + (k + 1) : '') + ' preview'));
+  let slider = buildSlider(shots.map(s => s.node));
+  const meta = el('div', 'meta');
+  const left = el('span');
+  left.textContent = 'Post ' + (i + 1) + ' · ' + postKindLabel(post) + (specs.length > 1 ? ' · ' + specs.length + ' slides' : '');
+  const right = el('span'); right.textContent = W + ' × ' + H + ' pixels';
+  meta.append(left, right);
+  if (mixedShapes(post)) {
+    const t = el('span', 'tag'); t.textContent = 'Mixed shapes';
+    t.title = 'This collage mixes landscape and portrait photos, which leaves empty space around them.';
+    meta.append(t);
+  }
+  if (post.strips && post.ids.length > 1) {
+    const n = post.ids.length, fd = frameDims(state.ratio, 1), ch = fd.H / n;
+    let worst = 0;
+    post.ids.forEach(id => {
+      const p = byId(id); if (!p) return;
+      const sc = Math.max(fd.W / p.w, ch / p.h);
+      worst = Math.max(worst, 1 - (fd.W / sc) * (ch / sc) / (p.w * p.h));
+    });
+    if (worst > 0.5) {
+      const t = el('span', 'tag'); t.textContent = 'Strips crop up to ' + Math.round(worst * 100) + '%';
+      t.title = 'Wide photos suit strips best. Tall photos lose most of their height here. Swap in landscape photos, or click a strip to choose which part stays.';
+      meta.append(t);
+    }
+  }
+  if (post.mode === 'split' && specs.length > 1 && specs[0].style === 'plain') {
+    const p = byId(post.ids[0]);
+    const cut = p ? cropFraction(p.w, p.h, state.ratio, specs.length) : 0;
+    if (cut > 0.3) {
+      const t = el('span', 'tag'); t.textContent = 'Crops ' + Math.round(cut * 100) + '%';
+      t.title = 'Filling every slide cuts away part of the photo. Try fewer slides, or Whole photo in a frame.';
+      meta.append(t);
+    }
+  }
+  const acts = el('div', 'acts');
+  const pv = el('button', 'btn'); pv.type = 'button'; pv.textContent = 'Preview';
+  pv.addEventListener('click', () => openIG(i));
+  const ed = el('button', 'btn'); ed.type = 'button'; ed.textContent = 'Edit';
+  ed.setAttribute('aria-pressed', String(state.editing === post.id));
+  ed.addEventListener('click', () => { state.editing = state.editing === post.id ? null : post.id; render(); });
+  const sv = el('button', 'btn'); sv.type = 'button'; sv.textContent = 'Save';
+  sv.addEventListener('click', () => saveOne(post, i));
+  const rd = el('button', 'btn rd'); rd.type = 'button'; rd.textContent = 'Redesign this post';
+  rd.title = 'Give only this post a different look';
+  rd.addEventListener('click', () => redesign(post, i));
+  acts.append(rd, pv, ed, sv);
+  card.append(slider.wrap, meta, acts);
+  const live = () => {
+    const sp = slideSpecs(post);
+    const sh = sp.map(sx => buildShot(sx, PW, PH));
+    sh.forEach((x, k) => x.cv.setAttribute('aria-label', 'Post ' + (i + 1) + (sh.length > 1 ? ', slide ' + (k + 1) : '') + ' preview'));
+    const ns = buildSlider(sh.map(x => x.node));
+    slider.wrap.replaceWith(ns.wrap); slider = ns;
+  };
+  if (state.editing === post.id) card.append(buildEdit(post, i, live));
+  return card;
+}
+
+function buildTray() {
+  const tray = $('tray');
+  const list = unplaced();
+  tray.hidden = !list.length;
+  tray.replaceChildren();
+  if (!list.length) return;
+  const h = el('h3'); h.textContent = 'Not in any post (' + list.length + ')';
+  const row = el('div', 'chiprow');
+  list.forEach(p => {
+    const chip = el('div', 'tchip');
+    chip.append(thumbCanvas(p, 18));
+    const opts = [];
+    state.posts.forEach((q, qi) => { if (q.mode !== 'split' && q.ids.length < maxFor(q)) opts.push({ value: String(q.id), text: 'Post ' + (qi + 1) }); });
+    opts.push({ value: 'new', text: 'A new post' });
+    chip.append(makeSelect('Add to…', opts, v => moveTo(p.id, v)));
+    chip.append(sqButton('×', 'Remove ' + p.name + ' completely', () => removePhoto(p.id)));
+    row.append(chip);
+  });
+  tray.append(h, row);
+}
+
+function draw() {
+  const { W, H } = frameDims(state.ratio, state.scale);
+  const PW = 540, PH = Math.round(PW * H / W);
+  syncControls();
+  lastCanvases = [];
+  const host = $('posts');
+  host.replaceChildren();
+  state.posts.forEach((post, i) => host.append(buildCard(post, i, PW, PH, W, H)));
+  if (!state.posts.length) { const e = el('p', 'empty'); e.textContent = state.photos.length ? 'No posts yet. Use Arrange automatically, or add photos from the list above.' : 'Add photos to see finished posts here.'; host.append(e); }
+  buildTray();
+  const np = state.photos.length, free = unplaced().length;
+  const files = state.posts.reduce((n, p) => n + slideSpecs(p).length, 0);
+  $('count').textContent = state.posts.length + (state.posts.length === 1 ? ' post' : ' posts') + ' from ' + np + (np === 1 ? ' photo' : ' photos') +
+    (files !== state.posts.length ? ' · ' + files + ' image files' : '') + (free ? ' · ' + free + ' not placed' : '');
+  const kinds = allKinds();
+  const hasCollage = kinds.some(k => k === 'pair' || k === 'trio');
+  const crops = kinds.includes('plain') || kinds.includes('board') || kinds.includes('strips') || state.posts.some(p => p.ids.length > 1 && p.mode === 'collage' && effLook(p) === 'fill');
+  $('cropHint').textContent = (crops
+    ? 'The crop follows the sharpest area of each photo. Click a preview to choose the subject yourself, double-click to go back to automatic.'
+    : 'Each photo is shown whole inside its post, so nothing is cropped away.') +
+    (hasCollage ? ' Automatic collages only combine photos with the same orientation.' : '') +
+    (state.posts.some(p => isMulti(p) && slideSpecs(p).length > 1) ? ' Every slide in a carousel uses the same shape.' : '') +
+    (state.posts.some(p => p.mode === 'board' && p.ids.length > 1) ? ' In Collage slides the first photo of each slide is the large one. Press Edit to swap photos or pick another arrangement, or Shuffle to try a new one.' : '') +
+    (state.posts.some(p => p.mode === 'split' && slideSpecs(p).length > 1) ? ' A split photo continues across its slides. Use Preview and swipe to see how the pieces line up.' : '');
+  $('editHint').textContent = state.edited
+    ? 'You changed this arrangement by hand. Picking another layout or pressing Arrange automatically replaces your changes.'
+    : 'Press Edit on a post to add, remove, reorder or move photos, or to pick its own style and frame color. A photo can be in only one post. Preview shows how it swipes on Instagram.';
+  $('saveAll').textContent = state.posts.length > 1 ? 'Save all (' + state.posts.length + ')' : 'Save';
+  $('saveAll').disabled = busy || !state.posts.length;
+  saveSettings();
+}
+
+function renderThumbs() {
+  const host = $('thumbs');
+  host.replaceChildren();
+  state.photos.forEach(p => {
+    const t = el('div', 'thumb');
+    const c = thumbCanvas(p, 56);
+    t.append(c);
+    if (!p.sample) {
+      const b = el('button'); b.type = 'button'; b.textContent = '×'; b.setAttribute('aria-label', 'Remove ' + p.name + ' completely');
+      b.addEventListener('click', () => removePhoto(p.id));
+      t.append(b);
+    }
+    host.append(t);
+  });
+  const samples = state.photos.length && state.photos.every(p => p.sample);
+  $('sampleNote').hidden = !samples;
+  $('clearAll').hidden = samples || !state.photos.length;
+  $('photoCount').textContent = samples ? 'Sample frames' : state.photos.length + (state.photos.length === 1 ? ' photo' : ' photos');
+}
+
+function resetToSamples() {
+  state.photos = makeSamples();
+  arrange();
+}
+function removePhoto(id) {
+  detach(id);
+  state.photos = state.photos.filter(p => p.id !== id);
+  if (!state.photos.length) resetToSamples();
+  else if (!state.edited) arrange();
+  renderThumbs(); render();
+}
+
+async function addFiles(list) {
+  const files = [...list].filter(f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|gif|avif)$/i.test(f.name));
+  if (!files.length) { say('No photos found in what you added. Choose photo files, not folders or videos.'); return; }
+  let ok = 0, cleared = false;
+  const bad = [], fresh = [];
+  for (let i = 0; i < files.length; i++) {
+    say('Reading photo ' + (i + 1) + ' of ' + files.length + '…');
+    try {
+      const bmp = await decode(files[i]);
+      const prev = shrink(bmp, 1000), auto = autoFocusFor(prev);
+      if (!cleared) {
+        state.photos = state.photos.filter(p => !p.sample);
+        state.posts = []; state.edited = false; state.editing = null;
+        cleared = true;
+      }
+      const photo = { id: nid(), name: files[i].name, w: bmp.width, h: bmp.height, file: files[i], prev, auto, focus: { ...auto }, manual: false };
+      state.photos.push(photo); fresh.push(photo);
+      if (bmp.close) bmp.close();
+      ok++;
+    } catch (e) { bad.push(files[i].name); }
+    if (i % 4 === 3) { renderThumbs(); render(); }
+  }
+  if (!state.photos.length) resetToSamples();
+  else if (fresh.length) {
+    if (state.edited && state.posts.length) {
+      state.posts.push(...buildPosts(fresh, state.layout, state.ratio).map(p => ({ id: nid(), ...p })));
+    } else arrange();
+  }
+  say(bad.length
+    ? 'Could not open ' + bad.length + (bad.length > 1 ? ' files: ' : ' file: ') + bad.slice(0, 3).join(', ') + (bad.length > 3 ? '…' : '') + '.'
+    : 'Added ' + ok + (ok === 1 ? ' photo.' : ' photos.'));
+  renderThumbs(); render();
+}
+
+/* ---------- Claude features ---------- */
+function copyFor(e) {
+  switch (e && e.code) {
+    case 'cancelled': return '';
+    case 'not_granted': case 'sampling_disabled': return 'Claude access was not allowed for this page, so this feature is off.';
+    case 'rate_limited': return 'Too many requests right now. Try again in a minute.';
+    case 'image_rejected': return 'That image could not be used. Try a regular screenshot saved as a photo file.';
+    case 'invalid_json': return 'The answer was not readable. Try again.';
+    case 'session_expired': return 'Sign in to Claude again, then retry.';
+    default: return 'Something went wrong. Try again.';
+  }
+}
+
+const REF_PROMPT = [
+  'The attached image is a screenshot of an Instagram post that a photographer likes. Ignore any Instagram buttons, names or captions around it.',
+  'Describe how the photo is presented so a layout tool can imitate the style. Do not describe the people or the scene.',
+  'Reply with only a JSON object with these keys:',
+  '"layout": "plain" if the photo fills the post edge to edge, "frame" if one photo sits inside a margin or border, "pair" if two photos share one post, "trio" if three do, "carousel" if it shows several slides to swipe through.',
+  '"ratio": the post shape, one of "4:5", "1:1", "9:16", "16:9".',
+  '"background": the colour of the border or backdrop around the photo as a hex string like "#FFFFFF" (use "#FFFFFF" if there is none).',
+  '"frame": border width as a whole number from 0 to 20, as a percent of the post\'s shorter side.',
+  '"gap": space between photos in a collage as a whole number from 0 to 10, in the same units (0 if there is no collage).',
+  '"note": one short plain sentence describing the style.'
+].join('\n');
+
+async function matchReference(file) {
+  const note = $('refNote');
+  note.textContent = 'Reading the post…';
+  try {
+    const out = await ai.json(REF_PROMPT, { images: file, modelTier: 'default' });
+    if (!out || typeof out !== 'object') throw { code: 'invalid_json' };
+    if (RATIOS[out.ratio]) state.ratio = out.ratio;
+    if (typeof out.background === 'string' && /^#[0-9a-f]{6}$/i.test(out.background)) state.bg = out.background.toUpperCase();
+    if (Number.isFinite(Number(out.frame))) state.frame = clamp(Math.round(Number(out.frame)), 0, 20);
+    if (Number.isFinite(Number(out.gap))) state.gap = clamp(Math.round(Number(out.gap)), 0, 10);
+    if (LAYOUTS[out.layout]) { state.layout = out.layout; arrange(); }
+    render();
+    const s = typeof out.note === 'string' ? out.note.slice(0, 200) : '';
+    note.textContent = (s ? s + ' ' : '') + 'The style controls are set to match. Adjust anything you like.';
+  } catch (e) {
+    note.textContent = copyFor(e) || '';
+  }
+}
+
+const CAP_BANK = {
+  wedding: { noun: 'wedding', local: ['weddingphotographer', 'weddingphotography'],
+    broad: ['weddingphotography', 'weddingphotographer', 'bride'], mid: ['weddinginspiration', 'realwedding', 'weddingday', 'candidweddingphotography', 'weddingmoments'],
+    hooks: ['The moment before everything changed.', 'This is the look worth waiting all day for.', 'Some weddings you just feel in a photo.', 'Not posed. Just them.'],
+    ctas: ['Save this for your wedding shot list.', 'Send this to someone planning their big day.', 'Which frame is your favorite? Tell me below.'] },
+  engagement: { noun: 'engagement', local: ['engagementphotographer', 'couplesphotographer'],
+    broad: ['engagementphotos', 'couplesphotography', 'justengaged'], mid: ['engagementsession', 'shesaidyes', 'couplegoals', 'engagementshoot', 'lovestory'],
+    hooks: ['She said yes, and this is how it looked.', 'Two people, one golden hour.', 'The easy, laughing kind of engagement session.'],
+    ctas: ['Save this for your own session ideas.', 'Tag the person you would take photos like this with.', 'Which pose would you try? Tell me below.'] },
+  portrait: { noun: 'portrait', local: ['portraitphotographer', 'photographer'],
+    broad: ['portraitphotography', 'portrait', 'portraitphotographer'], mid: ['naturallightportrait', 'goldenhourportrait', 'portraitmood', 'peopleinframe', 'candidportrait'],
+    hooks: ['Natural light does most of the work.', 'A portrait should feel like the person.', 'Golden hour, no tricks.'],
+    ctas: ['Save this for your next shoot inspiration.', 'Send this to someone who needs new portraits.', 'Which edit style do you prefer? Tell me below.'] },
+  family: { noun: 'family', local: ['familyphotographer', 'familyphotography'],
+    broad: ['familyphotography', 'familyphotographer', 'familyportraits'], mid: ['familysession', 'lifestylefamilyphotography', 'familymoments', 'candidfamilyphotos', 'familyoutdoorphotos'],
+    hooks: ['The real family photos are the in-between ones.', 'Everyone looking at each other, finally.', 'These years go fast. This is why we photograph them.'],
+    ctas: ['Save this for your family session outfit ideas.', 'Send this to a family that is overdue for photos.', 'Which moment is your favorite? Tell me below.'] },
+  maternity: { noun: 'maternity and newborn', local: ['maternityphotographer', 'newbornphotographer'],
+    broad: ['maternityphotography', 'newbornphotography', 'babybump'], mid: ['maternityshoot', 'newbornphotographer', 'welcomebaby', 'pregnancyphotos', 'expectingmom'],
+    hooks: ['Quiet, soft, and just before everything changes.', 'A small chapter that deserves a real photograph.'],
+    ctas: ['Save this for your own session ideas.', 'Send this to a mom-to-be.', 'Which frame is your favorite? Tell me below.'] },
+  event: { noun: 'event', local: ['eventphotographer', 'eventphotography'],
+    broad: ['eventphotography', 'eventphotographer', 'party'], mid: ['partyphotography', 'eventphotos', 'candidphotography', 'eventmoments', 'celebration'],
+    hooks: ['The best moments happen when nobody is posing.', 'The room, the people, the energy, all in a few frames.'],
+    ctas: ['Save this for your next event planning.', 'Tag someone who was there.', 'Which moment would you want framed? Tell me below.'] },
+  other: { noun: 'photography', local: ['photographer', 'photography'],
+    broad: ['photography', 'photographer', 'photooftheday'], mid: ['naturallight', 'candidphotography', 'visualstoryteller', 'peopleinframe', 'goldenhour'],
+    hooks: ['A frame worth slowing down for.', 'Light, a moment, and a little patience.'],
+    ctas: ['Save this for photo inspiration.', 'Send this to a friend who loves photography.', 'Which one is your favorite? Tell me below.'] }
+};
+let capTurn = 0;
+const slugify = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '');
+function localCaption(kind, place, about, turn) {
+  const b = CAP_BANK[kind] || CAP_BANK.other, rot = (arr, k) => arr[(turn + k) % arr.length];
+  const hook = rot(b.hooks, 0), cta = rot(b.ctas, 1);
+  const where = place ? ' in ' + place : '';
+  const art = /^[aeiou]/i.test(b.noun) ? 'An ' : 'A ';
+  const line = art + b.noun + ' session' + where + ', photographed in natural, honest light.';
+  const body = about ? about.charAt(0).toUpperCase() + about.slice(1).replace(/[.!\s]+$/, '') + '. ' + line : line;
+  const tags = [];
+  const add = t => { t = slugify(t); if (t && !tags.includes(t)) tags.push(t); };
+  add(rot(b.broad, 0)); add(rot(b.broad, 1));
+  for (let i = 0; i < 3; i++) add(rot(b.mid, i * 2));
+  const ps = slugify((place || '').split(',')[0]);
+  if (ps) { add(ps + b.local[0]); add(ps + 'photographer'); add(ps + 'photography'); }
+  return { text: hook + '\n\n' + body + '\n\n' + cta + '\n\n' + tags.slice(0, 8).map(t => '#' + t).join(' '), alt: '' };
+}
+function quickDraft() {
+  const r = localCaption($('kind').value, $('place').value.trim().slice(0, 60), $('about').value.trim().slice(0, 200), capTurn++);
+  $('caption').value = r.text;
+  $('capNote').textContent = 'Quick draft made. Press it again for another version, or edit freely. Add your own personal detail to the first line before posting.';
+  render();
+}
+
+async function draftCaption() {
+  const btn = $('draft');
+  if (capCtl) { capCtl.abort(); return; }
+  const out = $('caption'), note = $('capNote');
+  const blobs = [];
+  if (aiImages) {
+    for (const cv of lastCanvases.slice(0, 3)) {
+      const b = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.82));
+      if (b) blobs.push(b);
+    }
+  }
+  const about = $('about').value.trim().slice(0, 300), place = $('place').value.trim().slice(0, 60), kind = $('kind').selectedOptions[0].textContent;
+  const prompt = [
+    'You write Instagram captions for a professional photographer, aiming for the best organic reach and engagement.',
+    blobs.length ? 'The attached images are the finished post previews.' : 'You cannot see the photos, so rely on the notes below.',
+    'Type of shoot: ' + kind + '.',
+    place ? 'Location: ' + place + '.' : 'No location was given.',
+    about ? 'The photographer says this post is about: ' + about : 'The photographer gave no further notes.',
+    'Rules that help reach on Instagram today:',
+    '- hook: the first line, under 90 characters, shown before "more". Make it specific and curiosity-driven, with a natural keyword in it. No hashtags, no hype words, no clickbait.',
+    '- body: one to three short sentences in a warm, natural voice that work like search keywords (shoot type, setting, light, mood' + (place ? ', the location' : '') + '). Never name or guess who the people are.',
+    '- cta: one line giving a reason to save, send or comment, such as "Save this for ..." or a simple question. Saves and shares count most.',
+    '- hashtags: 6 to 8 only, written without the # symbol. One or two broad, three or four mid-size and specific to this shoot, and one or two ' + (place ? 'local, using the place name' : 'niche') + '. Nothing spammy (no follow4follow, fyp, or unrelated trending tags).',
+    '- alt: a plain, literal description of what is visible in the photos, under 125 characters, for accessibility.',
+    'Use at most one emoji in the whole caption, or none.'
+  ].join('\n');
+  const schema = 'Reply with JSON only: {"hook": string, "body": string, "cta": string, "hashtags": string[], "alt": string}';
+  capCtl = new AbortController();
+  btn.textContent = 'Stop';
+  note.textContent = '';
+  out.value = 'Thinking…';
+  try {
+    const r = await ai.json(prompt + '\n' + schema, { images: blobs.length ? blobs : undefined, signal: capCtl.signal, modelTier: 'default', cache: false });
+    const tags = (Array.isArray(r.hashtags) ? r.hashtags : []).map(t => '#' + slugify(String(t))).filter(t => t.length > 1).slice(0, 8);
+    out.value = [r.hook, r.body, r.cta].filter(x => typeof x === 'string' && x.trim()).map(x => x.trim()).join('\n\n') + (tags.length ? '\n\n' + tags.join(' ') : '');
+    if (typeof r.alt === 'string') $('alt').value = r.alt.trim().slice(0, 200);
+    note.textContent = 'Draft ready. Press again for a different version.';
+    render();
+  } catch (e) {
+    out.value = '';
+    const m = copyFor(e);
+    if (m) say(m);
+  }
+  capCtl = null;
+  btn.textContent = 'Draft with Claude';
+}
+
+async function initCaps() {
+  if (!(window.claude && typeof window.claude.use === 'function')) return;
+  const [d, s, dbx] = await Promise.all([
+    window.claude.use('downloads').catch(() => null),
+    window.claude.use('sample').catch(() => null),
+    window.claude.use('db').catch(() => null)
+  ]);
+  dl = d || null;
+  ai = s || null;
+  db = dbx || null;
+  if (ai) {
+    try { const lim = await ai.limits(); aiImages = !!(lim && lim.images); aiTypes = lim && lim.images ? lim.images.mediaTypes : null; }
+    catch (e) { aiImages = false; }
+    $('draft').hidden = false;
+    if (aiImages) {
+      $('refSec').hidden = false;
+      $('shotBox').hidden = false;
+      if (aiTypes && aiTypes.length) $('refFile').accept = aiTypes.join(',');
+    }
+  }
+  if (db) { $('refSec').hidden = false; $('linkBox').hidden = false; watchRefs(); }
+}
+
+/* ---------- saved Instagram links ---------- */
+function igCode(u) {
+  const m = String(u || '').trim().match(/^https?:\/\/(?:www\.)?instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv)\/([A-Za-z0-9_-]{5,})/i);
+  return m ? { kind: m[1].toLowerCase(), code: m[2] } : null;
+}
+function cleanRecipe(r) {
+  if (!r || typeof r !== 'object') return null;
+  const out = {};
+  if (RATIOS[r.ratio]) out.ratio = r.ratio;
+  if (typeof r.background === 'string' && /^#[0-9a-f]{6}$/i.test(r.background)) out.bg = r.background.toUpperCase();
+  if (Number.isFinite(Number(r.frame))) out.frame = clamp(Math.round(Number(r.frame)), 0, 20);
+  if (Number.isFinite(Number(r.gap))) out.gap = clamp(Math.round(Number(r.gap)), 0, 10);
+  if (Array.isArray(r.picks)) { const pk = r.picks.filter(k => ALL_PICKS.includes(k)); if (pk.length) out.picks = [...new Set(pk)]; }
+  if (LAYOUTS[r.layout]) out.layout = r.layout;
+  if (Array.isArray(r.texts)) {
+    out.texts = r.texts.slice(0, 6).map(t => {
+      if (!t || typeof t.text !== 'string' || !t.text.trim()) return null;
+      const spot = TEXT_SPOTS[t.placement] ? t.placement : 'bottom-center';
+      return {
+        post: Math.max(1, Math.round(Number(t.post) || 1)), slide: Math.max(0, Math.round(Number(t.slide) || 0)), text: t.text.trim().slice(0, 120),
+        font: FONTS[t.font] ? t.font : 'elegant', spot, size: clamp(Number(t.size) || 6, 2, 16),
+        color: /^#[0-9a-f]{6}$/i.test(t.color || '') ? t.color.toUpperCase() : '#FFFFFF'
+      };
+    }).filter(Boolean);
+  }
+  out.name = typeof r.name === 'string' ? r.name.slice(0, 80) : '';
+  out.note = typeof r.note === 'string' ? r.note.slice(0, 400) : '';
+  return out.picks || out.layout ? out : null;
+}
+function applyRecipe(r) {
+  if (r.ratio) state.ratio = r.ratio;
+  if (r.bg) state.bg = r.bg;
+  if (r.frame != null) state.frame = r.frame;
+  if (r.gap != null) state.gap = r.gap;
+  if (r.picks && r.picks.length > 1) {
+    state.combine = true; state.picks = r.picks.slice(); state.layout = 'mix';
+  } else {
+    const k = (r.picks && r.picks[0]) || r.layout;
+    state.combine = false; state.layout = LAYOUTS[k] ? k : 'frame'; state.picks = [state.layout];
+  }
+  state.seed++;
+  arrange();
+  (r.texts || []).forEach(t => {
+    const post = state.posts[Math.min(t.post, state.posts.length) - 1];
+    if (!post) return;
+    const sp = TEXT_SPOTS[t.spot];
+    post.texts = post.texts || [];
+    post.texts.push(newTextLayer({ text: t.text, font: t.font, size: t.size, color: t.color, align: sp[0], y: sp[1], slide: t.slide }));
+  });
+  render();
+}
+function renderRefs() {
+  const ul = $('refList');
+  ul.replaceChildren();
+  refDocs.forEach(r => {
+    const li = el('li');
+    const u = el('span', 'u'); u.textContent = r.url.replace(/^https?:\/\/(www\.)?/, ''); u.title = r.url;
+    const rc = r.status === 'done' ? cleanRecipe(r.recipe) : null;
+    const st = el('span', 'st' + (rc ? ' ready' : ''));
+    st.textContent = rc ? 'Layout ready' : r.status === 'failed' ? 'Claude could not read this post' : 'Waiting for Claude';
+    li.append(u, st);
+    if (rc && (rc.name || rc.note)) { const n = el('span', 'rn'); n.textContent = [rc.name, rc.note].filter(Boolean).join(' · '); li.append(n); }
+    if (r.status === 'failed' && r.error) { const n = el('span', 'rn'); n.textContent = String(r.error).slice(0, 200); li.append(n); }
+    const ra = el('div', 'ra');
+    if (rc) {
+      const ap = el('button', 'btn primary'); ap.type = 'button'; ap.textContent = 'Use this layout';
+      ap.addEventListener('click', () => { applyRecipe(rc); $('linkNote').textContent = 'Layout applied. All ' + state.photos.length + ' photos are used, in ' + state.posts.length + (state.posts.length === 1 ? ' post' : ' posts') + '. Press Redesign on any post for a different look.'; });
+      ra.append(ap);
+    }
+    const rm = el('button', 'btn'); rm.type = 'button'; rm.textContent = 'Remove';
+    rm.addEventListener('click', () => { db.collection('references').doc(r.id).delete().catch(() => { $('linkNote').textContent = 'Could not remove that link.'; }); });
+    ra.append(rm);
+    li.append(ra);
+    ul.append(li);
+  });
+}
+function watchRefs() {
+  try {
+    db.collection('references').onSnapshot(snap => {
+      refDocs = snap.docs.map(d => Object.assign({ id: d.id }, d.data() || {})).filter(r => typeof r.url === 'string')
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      renderRefs();
+    }, () => { $('linkNote').textContent = 'Saved links could not be loaded just now.'; });
+  } catch (e) { $('linkNote').textContent = 'Saved links are not available here.'; }
+}
+async function saveLink() {
+  const note = $('linkNote'), raw = $('refLink').value.trim();
+  const g = igCode(raw);
+  if (!g) { note.textContent = 'That does not look like an Instagram post link. It should start with https://www.instagram.com/p/ (or /reel/).'; return; }
+  const url = 'https://www.instagram.com/' + g.kind + '/' + g.code + '/';
+  if (refDocs.some(r => r.id === g.code)) { note.textContent = 'That link is already saved.'; return; }
+  $('saveLink').disabled = true;
+  try {
+    await db.collection('references').doc(g.code).set({ url, status: 'queued', createdAt: Date.now() });
+    $('refLink').value = '';
+    note.textContent = 'Saved. Now tell Claude in your chat: “process my Feed Frames links”. The layout shows up below when it is ready.';
+  } catch (e) {
+    note.textContent = e && e.code === 'not_granted' ? 'You do not have permission to save links here.' : 'Could not save the link. Try again.';
+  }
+  $('saveLink').disabled = false;
+}
+
+/* ---------- wiring ---------- */
+function buildStatic() {
+  const rb = $('ratios');
+  for (const [k, r] of Object.entries(RATIOS)) {
+    const d = frameDims(k, 1);
+    const b = el('button', 'opt'); b.type = 'button'; b.dataset.ratio = k;
+    const ico = el('span', 'ico'), i = document.createElement('i');
+    i.style.width = (r.w >= r.h ? 28 : Math.round(28 * r.w / r.h)) + 'px';
+    i.style.height = (r.w >= r.h ? Math.round(28 * r.h / r.w) : 28) + 'px';
+    ico.append(i);
+    const t = el('span');
+    t.innerHTML = '<b>' + k + '</b><small>' + r.label + '</small><small>' + d.W + ' × ' + d.H + '</small>';
+    b.append(ico, t);
+    b.addEventListener('click', () => { state.ratio = k; if (!state.edited) arrange(); render(); });
+    rb.append(b);
+  }
+  const lb = $('layouts');
+  for (const [k, l] of Object.entries(LAYOUTS)) {
+    const b = el('button', 'opt'); b.type = 'button'; b.dataset.layout = k;
+    const ico = el('span', 'ico');
+    ico.innerHTML = '<svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true">' + l.svg + '</svg>';
+    const t = el('span'); t.innerHTML = '<b>' + l.name + '</b><small>' + l.sub + '</small>';
+    b.append(ico, t);
+    b.addEventListener('click', () => state.combine ? togglePick(k) : setLayout(k));
+    lb.append(b);
+  }
+  const pb = $('presets');
+  PRESETS.forEach(p => {
+    const b = el('button', 'chip'); b.type = 'button'; b.textContent = p.name;
+    b.addEventListener('click', () => { state.bg = p.bg; state.frame = p.frame; state.gap = p.gap; setLayout(p.layout); });
+    pb.append(b);
+  });
+  const sw = $('swatches');
+  SWATCHES.forEach(c => {
+    const b = el('button'); b.type = 'button'; b.dataset.color = c; b.style.background = c; b.setAttribute('aria-label', 'Background ' + c);
+    b.addEventListener('click', () => { state.bg = c; render(); });
+    sw.append(b);
+  });
+  const ci = document.createElement('input');
+  ci.type = 'color'; ci.id = 'color'; ci.setAttribute('aria-label', 'Custom background colour');
+  ci.addEventListener('input', () => { state.bg = ci.value.toUpperCase(); render(); });
+  sw.append(ci);
+
+  $('frame').addEventListener('input', e => { state.frame = Number(e.target.value); render(); });
+  $('gap').addEventListener('input', e => { state.gap = Number(e.target.value); render(); });
+  $('fill').addEventListener('change', e => { state.fill = e.target.checked; render(); });
+  $('size').addEventListener('change', e => { state.scale = EXPORT_W[Number(e.target.value)] ? Number(e.target.value) : 3; render(); });
+  $('single').addEventListener('change', e => { state.single = e.target.value === 'plain' ? 'plain' : 'frame'; render(); });
+
+  $('files').addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; });
+  $('clearAll').addEventListener('click', () => { resetToSamples(); say('Removed all photos.'); renderThumbs(); render(); });
+  $('saveAll').addEventListener('click', saveAll);
+  $('combine').addEventListener('change', e => {
+    state.combine = e.target.checked;
+    state.picks = state.layout === 'mix' ? ALL_PICKS.slice() : [state.layout];
+    if (!state.combine) { state.layout = state.picks.length === 1 ? state.picks[0] : 'mix'; }
+    arrange(); render();
+  });
+  $('randomize').addEventListener('click', () => { state.seed++; arrange(); say('New random arrangement.'); render(); });
+  $('redesignAll').addEventListener('click', redesignAll);
+  $('rearrange').addEventListener('click', () => { arrange(); say('Photos regrouped automatically.'); render(); });
+
+  const drop = $('drop');
+  ['dragenter', 'dragover'].forEach(n => drop.addEventListener(n, e => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(n => drop.addEventListener(n, () => drop.classList.remove('over')));
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+
+  $('vclose').addEventListener('click', closeViewer);
+  $('viewer').addEventListener('click', e => { if (e.target === $('viewer')) closeViewer(); });
+  $('vsave').addEventListener('click', () => { if (viewerSave) viewerSave(); });
+  $('igClose').addEventListener('click', closeIG);
+  $('ig').addEventListener('click', e => { if (e.target === $('ig')) closeIG(); });
+  $('igPrev').addEventListener('click', () => { igIdx = Math.max(0, igIdx - 1); renderIG(); });
+  $('igNext').addEventListener('click', () => { igIdx = Math.min(state.posts.length - 1, igIdx + 1); renderIG(); });
+  $('igFull').addEventListener('click', igFullSize);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (!$('viewer').hidden) closeViewer();
+      else if (!$('ig').hidden) closeIG();
+    } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !$('ig').hidden && $('viewer').hidden && igSlider) {
+      igSlider.track.scrollBy({ left: (e.key === 'ArrowLeft' ? -1 : 1) * igSlider.track.clientWidth, behavior: 'smooth' });
+    }
+  });
+
+  $('refFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f && ai) matchReference(f); });
+  $('saveLink').addEventListener('click', saveLink);
+  $('refLink').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); saveLink(); } });
+  $('draft').addEventListener('click', () => { if (ai) draftCaption(); });
+  $('quick').addEventListener('click', quickDraft);
+  const copyFrom = (id, label) => async () => {
+    const t = $(id);
+    try { await navigator.clipboard.writeText(t.value); say(label + ' copied.'); }
+    catch (e) { t.focus(); t.select(); say('Press Ctrl+C or Cmd+C to copy the selected text.'); }
+  };
+  $('copyAlt').addEventListener('click', copyFrom('alt', 'Alt text'));
+  $('copyCap').addEventListener('click', copyFrom('caption', 'Caption'));
+}
+
+loadSettings();
+buildStatic();
+resetToSamples();
+renderThumbs();
+render();
+initCaps();
+})();
+</script>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const el = (t, c) => { const e = document.createElement(t); if (c) e.className = c; return e; };
+const cap1 = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+const slugify = t => String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '');
+
+const BANK = {
+wedding: { noun: 'wedding', local: ['weddingphotographer', 'weddingphotography'],
+broad: ['weddingphotography', 'weddingphotographer', 'bride'], mid: ['weddinginspiration', 'realwedding', 'weddingday', 'candidweddingphotography', 'weddingmoments'],
+hooks: ['The moment before everything changed.', 'This is the look worth waiting all day for.', 'Some weddings you just feel in a photo.', 'Not posed. Just them.', 'The in-between moments are the whole story.'],
+ctas: ['Save this for your wedding shot list.', 'Send this to someone planning their big day.', 'Which frame is your favorite? Tell me below.', 'Getting married soon? Save this for your photographer.'] },
+engagement: { noun: 'engagement', local: ['engagementphotographer', 'couplesphotographer'],
+broad: ['engagementphotos', 'couplesphotography', 'justengaged'], mid: ['engagementsession', 'shesaidyes', 'couplegoals', 'engagementshoot', 'lovestory'],
+hooks: ['She said yes, and this is how it looked.', 'Two people, one golden hour.', 'The easy, laughing kind of engagement session.', 'Proof that the best photos happen between the poses.'],
+ctas: ['Save this for your own session ideas.', 'Tag the person you would take photos like this with.', 'Which pose would you try? Tell me below.', 'Send this to a couple who is overdue for photos.'] },
+portrait: { noun: 'portrait', local: ['portraitphotographer', 'photographer'],
+broad: ['portraitphotography', 'portrait', 'portraitphotographer'], mid: ['naturallightportrait', 'goldenhourportrait', 'portraitmood', 'peopleinframe', 'candidportrait'],
+hooks: ['Natural light does most of the work.', 'A portrait should feel like the person.', 'Golden hour, no tricks.', 'The best portraits start with a real conversation.'],
+ctas: ['Save this for your next shoot inspiration.', 'Send this to someone who needs new portraits.', 'Which edit style do you prefer? Tell me below.', 'Want portraits like this? Save this for later.'] },
+family: { noun: 'family', local: ['familyphotographer', 'familyphotography'],
+broad: ['familyphotography', 'familyphotographer', 'familyportraits'], mid: ['familysession', 'lifestylefamilyphotography', 'familymoments', 'candidfamilyphotos', 'familyoutdoorphotos'],
+hooks: ['The real family photos are the in-between ones.', 'Everyone looking at each other, finally.', 'These years go fast. This is why we photograph them.', 'Messy, loud, and exactly how they are.'],
+ctas: ['Save this for your family session outfit ideas.', 'Send this to a family that is overdue for photos.', 'Which moment is your favorite? Tell me below.', 'Planning family photos? Save this for ideas.'] },
+maternity: { noun: 'maternity and newborn', local: ['maternityphotographer', 'newbornphotographer'],
+broad: ['maternityphotography', 'newbornphotography', 'babybump'], mid: ['maternityshoot', 'newbornphotographer', 'welcomebaby', 'pregnancyphotos', 'expectingmom'],
+hooks: ['Quiet, soft, and just before everything changes.', 'A small chapter that deserves a real photograph.', 'Waiting for you, and already so loved.'],
+ctas: ['Save this for your own session ideas.', 'Send this to a mom-to-be.', 'Which frame is your favorite? Tell me below.', 'Expecting? Save this for your session planning.'] },
+event: { noun: 'event', local: ['eventphotographer', 'eventphotography'],
+broad: ['eventphotography', 'eventphotographer', 'party'], mid: ['partyphotography', 'eventphotos', 'candidphotography', 'eventmoments', 'celebration'],
+hooks: ['The best moments happen when nobody is posing.', 'The room, the people, the energy, all in a few frames.', 'You had to be there. Now you can be.'],
+ctas: ['Save this for your next event planning.', 'Tag someone who was there.', 'Which moment would you want framed? Tell me below.', 'Hosting soon? Save this for your photo plan.'] },
+other: { noun: 'photography', local: ['photographer', 'photography'],
+broad: ['photography', 'photographer', 'photooftheday'], mid: ['naturallight', 'candidphotography', 'visualstoryteller', 'peopleinframe', 'goldenhour'],
+hooks: ['A frame worth slowing down for.', 'Light, a moment, and a little patience.', 'Some photos just need a second look.'],
+ctas: ['Save this for photo inspiration.', 'Send this to a friend who loves photography.', 'Which one is your favorite? Tell me below.', 'Which frame stays with you? Tell me below.'] }
+};
+const LINES = ['natural, honest light', 'soft golden light', 'real, unposed moments', 'clean, timeless color', 'warm, candid frames'];
+
+function localSet(kind, place, about, turn) {
+  const b = BANK[kind] || BANK.other;
+  const pick = (arr, k) => arr[(turn * 3 + k) % arr.length];
+  const city = (place || '').split(',')[0].trim();
+  const ps = slugify(city);
+  const where = place ? ' in ' + place : '';
+  const art = /^[aeiou]/i.test(b.noun) ? 'An ' : 'A ';
+  const aboutS = about ? cap1(about.replace(/[.!\s]+$/, '')) + '. ' : '';
+  const tags = (order, max) => {
+    const out = [];
+    order.forEach(t => { t = slugify(t); if (t && !out.includes(t)) out.push(t); });
+    return out.slice(0, max).map(t => '#' + t).join(' ');
+  };
+  const localTags = ps ? [ps + b.local[0], ps + 'photographer', ps + 'photography'] : [];
+  const alt = (cap1(b.noun) + ' photo' + where + (about ? ': ' + about : '')).slice(0, 125);
+  const A = {
+    label: 'Story-led',
+    text: pick(b.hooks, 0) + '\n\n' + aboutS + art + b.noun + ' session' + where + ', photographed in ' + pick(LINES, 0) + '.\n\n' + pick(b.ctas, 0) + '\n\n' +
+      tags([pick(b.broad, 0), pick(b.broad, 1), pick(b.mid, 0), pick(b.mid, 2), pick(b.mid, 4)].concat(localTags), 8),
+    alt
+  };
+  const B = {
+    label: 'Search-friendly',
+    text: pick(b.hooks, 1) + '\n\n' + cap1(b.noun) + ' photographer' + where + '. ' + aboutS + 'Candid moments in ' + pick(LINES, 1) + '.\n\n' + pick(b.ctas, 1) + '\n\n' +
+      tags(localTags.concat([pick(b.broad, 1), pick(b.broad, 2), pick(b.mid, 1), pick(b.mid, 3), pick(b.mid, 0)]), 8),
+    alt
+  };
+  const C = {
+    label: 'Short and punchy',
+    text: pick(b.hooks, 2) + '\n\n' + (about ? aboutS.trim() + '\n\n' : '') + pick(b.ctas, 2) + '\n\n' +
+      tags([pick(b.broad, 0)].concat(localTags.slice(0, 1), [pick(b.mid, 1), pick(b.mid, 3), pick(b.broad, 2)]), 5),
+    alt
+  };
+  return [A, B, C];
+}
+
+let ai = null, aiImg = false, turn = 0, ctl = null, sel = -1, current = [], made = false;
+let rowBtn, quickBtn, box, postSel, seenEl;
+
+function css() {
+  const s = document.createElement('style');
+  s.textContent = '#quick,#draft{display:none!important}' +
+    '.copts{display:grid;gap:10px}' +
+    '.ccard{background:var(--stage-2);border:1px solid var(--stage-line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}' +
+    ".ccard[data-on='true']{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}" +
+    '.chead{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--stage-mute)}' +
+    '.ctext{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.5;color:var(--stage-ink)}' +
+    '.ckey{border:1px solid var(--stage-line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:8px}.ckey summary{cursor:pointer;font-weight:600}.ckey input{width:100%;padding:8px 10px;border:1px solid var(--stage-line);border-radius:7px}' +
+    '.crow{display:flex;gap:6px;flex-wrap:wrap}.crow .btn{padding:6px 10px;font-size:13px}';
+  document.head.append(s);
+}
+
+function note(msg) { $('capNote').textContent = msg || ''; }
+
+function use(i) {
+  const o = current[i];
+  if (!o) return;
+  sel = i;
+  $('caption').value = o.text;
+  if (o.alt) $('alt').value = o.alt;
+  $('caption').dispatchEvent(new Event('input', { bubbles: true }));
+  note('Option ' + (i + 1) + ' is in the caption box below. You can edit it, then use Copy.');
+  paint();
+}
+
+async function copyOpt(i) {
+  const o = current[i];
+  try { await navigator.clipboard.writeText(o.text); note('Option ' + (i + 1) + ' copied.'); }
+  catch (e) { use(i); $('caption').focus(); $('caption').select(); note('Press Ctrl+C or Cmd+C to copy the selected text.'); }
+}
+
+function paint() {
+  box.replaceChildren();
+  current.forEach((o, i) => {
+    const card = el('div', 'ccard');
+    card.dataset.on = String(i === sel);
+    const head = el('div', 'chead'); head.textContent = 'Option ' + (i + 1) + ' \u00b7 ' + o.label;
+    const body = el('p', 'ctext'); body.textContent = o.text;
+    const row = el('div', 'crow');
+    const u = el('button', 'btn' + (i === sel ? '' : ' primary')); u.type = 'button';
+    u.textContent = i === sel ? 'Selected' : 'Use this'; u.setAttribute('aria-pressed', String(i === sel));
+    u.addEventListener('click', () => use(i));
+    const c = el('button', 'btn'); c.type = 'button'; c.textContent = 'Copy';
+    c.addEventListener('click', () => copyOpt(i));
+    row.append(u, c);
+    card.append(head, body, row);
+    box.append(card);
+  });
+}
+
+function labels() {
+  rowBtn.textContent = made ? '\u21bb Generate new set' : (ai && aiImg ? 'Write 3 captions from my photos' : 'Generate 3 options');
+  quickBtn.textContent = made ? '\u21bb New template set' : 'Template set (no photo reading)';
+  quickBtn.hidden = !ai;
+}
+
+function instant() {
+  current = localSet($('kind').value, $('place').value.trim().slice(0, 60), $('about').value.trim().slice(0, 200), turn++);
+  made = true;
+  note('Template captions, not written from your photos. Pick one or generate a new set.');
+  seenEl.textContent = ai ? '' : 'To get captions written from what is actually in your photos, add a Claude key above.';
+  labels();
+  use(0);
+}
+
+function errMsg(c) {
+  switch (c) {
+    case 'cancelled': return '';
+    case 'rate_limited': return 'Too many requests right now. Try again in a minute, or use Instant set.';
+    case 'not_granted': case 'sampling_disabled': return 'Claude access was not allowed for this page. Use Instant set instead.';
+    case 'bad_key': return 'Claude did not accept that key. Check it in the key box and try again.';
+    case 'network': return 'Could not reach Claude. Check your connection and try again.';
+    case 'no_images': return 'There is no preview for that post yet. Wait a moment and try again.';
+    default: return 'Claude could not write these just now. Try again, or use Instant set.';
+  }
+}
+
+function postCanvases() {
+  const arts = [...document.querySelectorAll('#posts article')];
+  const a = arts[Number(postSel && postSel.value) || 0] || arts[0];
+  return a ? [...a.querySelectorAll('canvas')] : [];
+}
+
+function fillPosts() {
+  if (!postSel) return;
+  const arts = [...document.querySelectorAll('#posts article')];
+  const prev = postSel.value;
+  postSel.replaceChildren();
+  arts.forEach((a, i) => {
+    const m = a.querySelector('.meta span');
+    const o = document.createElement('option');
+    o.value = String(i); o.textContent = m ? m.textContent : 'Post ' + (i + 1);
+    postSel.append(o);
+  });
+  if (prev && Number(prev) < arts.length) postSel.value = prev;
+}
+
+function toB64(blob) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
+}
+
+function apiShim(key) {
+  const f = async (prompt, o) => {
+    const content = [];
+    for (const b of ((o && o.images) || [])) content.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: await toB64(b) } });
+    content.push({ type: 'text', text: prompt });
+    let res;
+    try {
+      res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST', signal: o && o.signal,
+        headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+        body: JSON.stringify({ model: 'claude-sonnet-5-5', max_tokens: 2000, messages: [{ role: 'user', content }] })
+      });
+    } catch (e) { throw { code: e && e.name === 'AbortError' ? 'cancelled' : 'network' }; }
+    if (res.status === 401 || res.status === 403) throw { code: 'bad_key' };
+    if (res.status === 429) throw { code: 'rate_limited' };
+    if (!res.ok) throw { code: 'api_error' };
+    const j = await res.json();
+    const t = (j.content || []).map(c => c.text || '').join('');
+    const m = t.match(/\{[\s\S]*\}/);
+    if (!m) throw { code: 'invalid_json' };
+    try { return JSON.parse(m[0]); } catch (e) { throw { code: 'invalid_json' }; }
+  };
+  f.json = f;
+  f.limits = async () => ({ images: true });
+  return f;
+}
+
+const KEYNAME = 'feed-frames-claude-key';
+function getKey() { try { return localStorage.getItem(KEYNAME) || ''; } catch (e) { return ''; } }
+function setKey(k) { try { if (k) localStorage.setItem(KEYNAME, k); else localStorage.removeItem(KEYNAME); } catch (e) { /* ignore */ } }
+
+async function withClaude() {
+  if (ctl) { ctl.abort(); return; }
+  const kind = $('kind').selectedOptions[0].textContent;
+  const place = $('place').value.trim().slice(0, 60), about = $('about').value.trim().slice(0, 300);
+  const blobs = [];
+  if (aiImg) {
+    for (const cv of postCanvases().slice(0, 4)) {
+      const bl = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.85));
+      if (bl) blobs.push(bl);
+    }
+  }
+  if (aiImg && !blobs.length) { note(errMsg('no_images')); return; }
+  const prompt = [
+    'You write Instagram captions for a professional photographer, aiming for the best organic reach and engagement.',
+    blobs.length ? 'Look carefully at the attached photos first. They are the slides of one post.' : 'You cannot see the photos, so rely on the notes below.',
+    blobs.length ? 'Before writing, take note of concrete visible details: the setting, time of day and quality of light, colors, clothing, props, expressions, poses, composition and mood.' : '',
+    'Type of shoot: ' + kind + '.',
+    place ? 'Location: ' + place + '.' : 'No location was given.',
+    about ? 'The photographer says this post is about: ' + about : 'The photographer gave no further notes.',
+    'Write exactly 3 clearly different options. Option 1 is story-led with an emotional, specific first line. Option 2 is search-friendly: keyword-rich and location-led. Option 3 is short and punchy and ends on a question.',
+    blobs.length ? 'Every option must use at least two specific details that are really visible in these photos. Do not mention anything you cannot see. Avoid generic filler such as "special moment", "capturing memories" or "a frame worth slowing down for".' : '',
+    'Rules that help reach on Instagram today, for every option:',
+    '- hook: the first line, under 90 characters, shown before "more". Specific and curiosity-driven, with a natural keyword. No hashtags, no hype words, no clickbait.',
+    '- body: one to three short sentences in a warm, natural voice that work like search keywords (shoot type, setting, light, mood' + (place ? ', the location' : '') + '). Never name or guess who the people are or how they are related unless the photographer said so. May be empty for option 3.',
+    '- cta: one line giving a reason to save, send or comment. Saves and shares count most.',
+    '- hashtags: 5 to 8 only, written without the # symbol. A mix of broad, mid-size and ' + (place ? 'local (using the place name)' : 'niche') + ', and at least two tied to what is visible. Nothing spammy (no follow4follow, fyp, or unrelated trending tags).',
+    '- alt: a plain, literal description of what is visible in the photos, under 125 characters.',
+    '- seen (once, at the top level): one short sentence listing the main details you noticed in the photos.',
+    'Use at most one emoji per option, or none. Make the three options differ in wording, not only in order.',
+    'Reply with JSON only: {"seen":string,"options":[{"label":string,"hook":string,"body":string,"cta":string,"hashtags":string[],"alt":string}]}'
+  ].filter(Boolean).join('\n');
+  ctl = new AbortController();
+  rowBtn.textContent = 'Stop';
+  note(blobs.length ? 'Looking at your photos and writing three options\u2026' : 'Writing three options\u2026');
+  seenEl.textContent = '';
+  try {
+    const r = await ai.json(prompt, { images: blobs.length ? blobs : undefined, signal: ctl.signal, modelTier: 'default', cache: false });
+    const list = (r && Array.isArray(r.options) ? r.options : []).slice(0, 3).map((o, i) => {
+      const tags = [];
+      (Array.isArray(o.hashtags) ? o.hashtags : []).forEach(t => { t = slugify(t); if (t && !tags.includes(t)) tags.push(t); });
+      const text = [o.hook, o.body, o.cta].filter(x => typeof x === 'string' && x.trim()).map(x => x.trim()).join('\n\n') +
+        (tags.length ? '\n\n' + tags.slice(0, 8).map(t => '#' + t).join(' ') : '');
+      return { label: typeof o.label === 'string' && o.label.trim() ? o.label.trim().slice(0, 30) : ['Story-led', 'Search-friendly', 'Short and punchy'][i], text, alt: typeof o.alt === 'string' ? o.alt.trim().slice(0, 200) : '' };
+    }).filter(o => o.text);
+    if (!list.length) throw { code: 'invalid_json' };
+    current = list; made = true;
+    if (blobs.length && r && typeof r.seen === 'string' && r.seen.trim()) seenEl.textContent = 'What Claude noticed in the photos: ' + r.seen.trim().slice(0, 300) + ' If something is wrong, add a note in the box above and generate again.';
+    note('Three options ready. Pick the one you like, or generate a new set.');
+    labels();
+    use(0);
+  } catch (e) {
+    note(errMsg(e && e.code));
+    labels();
+  }
+  ctl = null;
+  labels();
+}
+
+function buildKeyBox() {
+  const d = document.createElement('details'); d.className = 'ckey';
+  const s = document.createElement('summary'); s.textContent = 'Write captions from my photos (needs a Claude API key)';
+  const p = el('p', 'hint2');
+  p.textContent = 'Paste your own Claude API key. It stays in this browser only. When you generate captions, small previews of the selected post are sent to Claude so it can read them; nothing else is sent. Each set costs a few cents on your Anthropic account.';
+  const i = document.createElement('input'); i.type = 'password'; i.autocomplete = 'off'; i.placeholder = 'sk-ant-...'; i.setAttribute('aria-label', 'Claude API key'); i.value = getKey();
+  const row = el('div', 'btns');
+  const sv = el('button', 'btn primary'); sv.type = 'button'; sv.textContent = 'Save key';
+  const rm = el('button', 'btn'); rm.type = 'button'; rm.textContent = 'Remove key';
+  sv.addEventListener('click', () => {
+    const k = i.value.trim();
+    setKey(k); ai = k ? apiShim(k) : null; aiImg = !!k; labels();
+    note(k ? 'Key saved in this browser. Generate captions to have Claude read your photos.' : 'Key removed.');
+  });
+  rm.addEventListener('click', () => { i.value = ''; setKey(''); ai = null; aiImg = false; labels(); note('Key removed.'); });
+  row.append(sv, rm);
+  d.append(s, p, i, row);
+  if (!getKey()) d.open = true;
+  return d;
+}
+
+function init() {
+  css();
+  const lab = el('label'); lab.textContent = 'Write the caption for'; lab.htmlFor = 'capPost';
+  postSel = document.createElement('select'); postSel.id = 'capPost';
+  const row = el('div', 'btns');
+  rowBtn = el('button', 'btn primary'); rowBtn.type = 'button'; rowBtn.id = 'gen3';
+  quickBtn = el('button', 'btn'); quickBtn.type = 'button'; quickBtn.id = 'genQuick'; quickBtn.hidden = true;
+  row.append(rowBtn, quickBtn);
+  seenEl = el('p', 'hint2');
+  box = el('div', 'copts'); box.id = 'opts';
+  const n = $('capNote');
+  n.before(lab, postSel, row, seenEl, box);
+  fillPosts();
+  new MutationObserver(fillPosts).observe($('posts'), { childList: true });
+  labels();
+  window.__ffAI = () => ({ ai, aiImg });
+  rowBtn.addEventListener('click', () => { if (ai) withClaude(); else instant(); });
+  quickBtn.addEventListener('click', instant);
+  (async () => {
+    try {
+      if (window.claude && typeof window.claude.use === 'function') {
+        ai = await window.claude.use('sample');
+        if (ai) { const lim = await ai.limits(); aiImg = !!(lim && lim.images); }
+      }
+    } catch (e) { /* no Claude here */ }
+    if (!ai) {
+      lab.before(buildKeyBox());
+      const k = getKey();
+      if (k) { ai = apiShim(k); aiImg = true; }
+    }
+    labels();
+  })();
+}
+init();
+})();
+</script>
+
+</body></html>
